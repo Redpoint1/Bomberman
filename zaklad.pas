@@ -14,9 +14,11 @@ type
   TForm1 = class(TForm)
     Image1: TImage;
     Timer1: TTimer;
+    Timer2: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Timer1Timer(Sender: TObject);
+    procedure Timer2Timer(Sender: TObject);
   private
     { private declarations }
   public
@@ -29,6 +31,7 @@ var
   Form1: TForm1;
   Hrac: TPlayer;
   Wall: TSteny;
+  cislo: integer;
 
 implementation
 
@@ -59,17 +62,37 @@ end;
 
 procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  case Key of
-   VK_UP: Hrac.Posun(0);
-   VK_DOWN: Hrac.Posun(1);
-   VK_LEFT: Hrac.Posun(2);
-   VK_RIGHT: Hrac.Posun(3);
+  if not(Hrac.PohybujeSa) then
+  begin
+       cislo := -1;
+       case Key of
+        VK_UP: cislo := 0;
+        VK_DOWN: cislo := 1;
+        VK_LEFT: cislo := 2;
+        VK_RIGHT: cislo := 3;
+       end;
+       if (Hrac.OverPosun(cislo, Wall) and (cislo > -1)) then
+       begin
+         Hrac.PohybujeSa := true;
+         Timer2.Enabled := true;
+       end;
   end;
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
    Wall.Vykresli(Image1.Canvas);
+   Hrac.Vykresli(Image1.Canvas);
+end;
+
+procedure TForm1.Timer2Timer(Sender: TObject);
+begin
+  Hrac.Posun(cislo);
+  if (((Hrac.X mod 33) = 17) and ((Hrac.Y mod 33) = 17)) then
+  begin
+     Hrac.PohybujeSa := false;
+     Timer2.Enabled := false;
+  end;
 end;
 
 end.
