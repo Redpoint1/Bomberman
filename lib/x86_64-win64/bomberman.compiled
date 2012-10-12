@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<CONFIG>
-  <Compiler Value="E:\lazarus\fpc\2.6.0\bin\x86_64-win64\fpc.exe" Date="1095335316"/>
-  <Params Value=" -MObjFPC -Scghi -CirotR -O1 -g -gl -WG -vewnhi -l -FiE:\Users\Redpoint1\Lazarus\lib\x86_64-win64 -FuE:\lazarus\lcl\units\x86_64-win64\win32 -FuE:\lazarus\lcl\units\x86_64-win64 -FuE:\lazarus\components\lazutils\lib\x86_64-win64 -FuE:\lazarus\packager\units\x86_64-win64 -FuE:\Users\Redpoint1\Lazarus\ -FUE:\Users\Redpoint1\Lazarus\lib\x86_64-win64\ -dLCL -dLCLwin32 bomberman.lpr"/>
-</CONFIG>
