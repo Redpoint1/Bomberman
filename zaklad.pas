@@ -31,7 +31,6 @@ var
   Form1: TForm1;
   Hrac: TPlayer;
   Wall: TSteny;
-  cislo: integer;
 
 implementation
 
@@ -64,14 +63,14 @@ procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if not(Hrac.PohybujeSa) then
   begin
-       cislo := -1;
+       Hrac.Smer := -1;
        case Key of
-        VK_UP: cislo := 0;
-        VK_DOWN: cislo := 1;
-        VK_LEFT: cislo := 2;
-        VK_RIGHT: cislo := 3;
+        VK_UP: Hrac.Smer := 0;
+        VK_DOWN: Hrac.Smer := 1;
+        VK_LEFT: Hrac.Smer := 2;
+        VK_RIGHT: Hrac.Smer := 3;
        end;
-       if (Hrac.OverPosun(cislo, Wall) and (cislo > -1)) then
+       if (Hrac.OverPosun(Hrac.Smer, Wall) and (Hrac.Smer > -1)) then
        begin
          Hrac.PohybujeSa := true;
          Timer2.Enabled := true;
@@ -87,7 +86,7 @@ end;
 
 procedure TForm1.Timer2Timer(Sender: TObject);
 begin
-  Hrac.Posun(cislo);
+  Hrac.Posun(Hrac.Smer);
   if (((Hrac.X mod 33) = 17) and ((Hrac.Y mod 33) = 17)) then
   begin
      Hrac.PohybujeSa := false;

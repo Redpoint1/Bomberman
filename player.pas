@@ -14,7 +14,7 @@ type
     { TPlayer }
 
     TPlayer = class
-      Zivot, X, Y : Integer;
+      Zivot, X, Y, Smer : Integer;
       Farba: TColor;
       PohybujeSa : boolean;
       procedure Posun(klaves: Integer);
@@ -83,6 +83,7 @@ begin
   Y := YY;
   Farba := clBlack;
   PohybujeSa := false;
+  Smer := -1;
 end;
 
 end.
