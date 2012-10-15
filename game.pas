@@ -22,7 +22,7 @@ type
   { TSteny }
 
   TSteny = class
-    Steny : array[0..29, 0..19] of TStena;
+    Steny : array of array of TStena;
     procedure ZmenFarbu(X, Y: Integer; Farby : TColor);
     procedure Vykresli(Obr : TCanvas);
     Constructor Create();
@@ -52,7 +52,7 @@ end;
 
 constructor TSteny.Create;
 begin
-
+ SetLength(Steny, 0);
 end;
 
 { TStena }
