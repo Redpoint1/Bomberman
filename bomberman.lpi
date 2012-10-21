@@ -35,7 +35,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
         <Filename Value="bomberman.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -59,6 +59,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="game"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="npc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="npc"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

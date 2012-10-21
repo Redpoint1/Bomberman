@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, LCLType, player, game;
+  ExtCtrls, LCLType, player, game, npc;
 
 type
 
@@ -16,10 +16,12 @@ type
     Image1: TImage;
     Timer1: TTimer;
     Timer2: TTimer;
+    Timer3: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
+    procedure Timer3Timer(Sender: TObject);
   private
     { private declarations }
   public
@@ -33,6 +35,7 @@ var
   Form1: TForm1;
   Hrac: TPlayer;
   Wall: TSteny;
+  Nepriatel: TNpc;
 
 implementation
 
@@ -41,11 +44,11 @@ implementation
 { TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);
-var
-  i, j: integer;
 begin
+  Randomize;
   Hrac := TPlayer.Create(2 * 33 + 17, 2 * 33 + 17);
   Wall := TSteny.Create;
+  Nepriatel := TNPC.Create(20 * 33 + 17, 2 * 33 + 17, 1);
   Image1.Canvas.FillRect(Image1.ClientRect);
   Wall.Nacitaj('level', Image1.Height, Image1.Width);
 end;
@@ -71,7 +74,7 @@ begin
       VK_LEFT: Hrac.Smer := 2;
       VK_RIGHT: Hrac.Smer := 3;
     end;
-    if (Hrac.OverPosun(Hrac.Smer, Wall) and (Hrac.Smer > -1)) then
+    if (Hrac.OverPosun(Wall) and (Hrac.Smer > -1)) then
     begin
       Hrac.PohybujeSa := True;
       Timer2.Enabled := True;
@@ -82,11 +85,10 @@ end;
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
   Wall.Vykresli(Image1.Canvas);
-  Hrac.Vykresli(Image1.Canvas, Wall, Timer2);
+  Nepriatel.Vykresli(Image1.Canvas, Wall, Timer3);
   if ((Hrac.Bomby <> nil) or (length(Hrac.Bomby) > 0)) then
-  begin
     Hrac.VykresliBombu(Image1.Canvas, Wall);
-  end;
+  Hrac.Vykresli(Image1.Canvas, Wall, Timer2);
 end;
 
 procedure TForm1.Timer2Timer(Sender: TObject);
@@ -96,6 +98,31 @@ begin
   begin
     Hrac.PohybujeSa := False;
     Timer2.Enabled := False;
+  end;
+end;
+
+procedure TForm1.Timer3Timer(Sender: TObject);
+begin
+  Nepriatel.Posun;
+  if (((Nepriatel.X mod pixel) = 17) and ((Nepriatel.Y mod pixel) = 17) and
+    (Nepriatel.Smer <> 0)) then
+  begin
+    Nepriatel.PohybujeSa := False;
+    Timer3.Enabled := False;
+  end;
+  if (((Nepriatel.X mod pixel) = 17) and ((Nepriatel.Y mod pixel) = 17) and
+    (Nepriatel.Smer = 0)) then
+  begin
+    if (Nepriatel.Sekunda = 0) then
+    begin
+      Nepriatel.PohybujeSa := False;
+      Timer3.Enabled := False;
+      Nepriatel.Sekunda := 1000;
+    end
+    else
+    begin
+      Nepriatel.Sekunda := Nepriatel.Sekunda - 10;
+    end;
   end;
 end;
 

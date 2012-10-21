@@ -32,7 +32,7 @@ type
     procedure VykresliBombu(Obr: TCanvas; Walli: TSteny);
     procedure ZmazBomby;
     procedure ZmazNilBomby;
-    function OverPosun(klavesnica: integer; Okolie: TSteny): boolean;
+    function OverPosun(Okolie: TSteny): boolean;
     function OverVybuch(Okolie: TSteny): boolean;
     constructor Create(XX, YY: integer);
   end;
@@ -179,10 +179,10 @@ begin
   setlength(Bomby, length(Bomby) - velkost);
 end;
 
-function TPlayer.OverPosun(klavesnica: integer; Okolie: TSteny): boolean;
+function TPlayer.OverPosun(Okolie: TSteny): boolean;
 begin
   Result := False;
-  case klavesnica of
+  case Smer of
     0:
     begin
       if ((Y div 33 - 1 - 2) < 0) then
