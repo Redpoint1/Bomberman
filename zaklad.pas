@@ -5,7 +5,7 @@ unit zaklad;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls, Math, LCLType, player, game;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls, LCLType, player, game;
 
 type
 
@@ -16,7 +16,7 @@ type
     Timer1: TTimer;
     Timer2: TTimer;
     procedure FormCreate(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
   private
@@ -31,7 +31,6 @@ var
   Form1: TForm1;
   Hrac: TPlayer;
   Wall: TSteny;
-  Bomb: TBomba;
 
 implementation
 
@@ -52,7 +51,7 @@ begin
       for j:=0 to (Image1.Height div pixel)-5 do
       begin
       SetLength(Wall.Steny[i], Length(Wall.Steny[i])+1);
-      if (((i mod 3) = 1) and ((j mod 3) = 1)) then
+      if (((i mod 2) = 1) and ((j mod 2) = 1)) then
       begin
          Wall.Steny[i][j] := TStena.Create(i*pixel+17+2*pixel, j*pixel+17+2*pixel, 1);
          Wall.ZmenFarbu(i,j, clRed);
@@ -66,10 +65,18 @@ begin
   end;
 end;
 
-procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
+  );
 begin
-  if (key = VK_SPACE) then
-    Bomb := TBomba.Create(((Hrac.X div 33)*33 + 17), ((Hrac.Y div 33)*33 + 17), 3, 1);
+   if (key = VK_SPACE) then
+   begin
+      if (Wall.Steny[(Hrac.X div 33)-2][(Hrac.Y div 33)-2].Typ <> 2) then
+      begin
+           setlength(Hrac.Bomby, length(Hrac.Bomby)+1);
+           Hrac.Bomby[high(Hrac.Bomby)] := TBomba.Create(((Hrac.X div 33)*33 + 17), ((Hrac.Y div 33)*33 + 17), 3, 2);
+           Wall.Steny[(Hrac.X div 33)-2][(Hrac.Y div 33)-2].Typ:= 2;
+      end;
+   end;
   if not(Hrac.PohybujeSa) then
   begin
        Hrac.Smer := -1;
@@ -88,24 +95,12 @@ begin
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
-var
-  i,j : integer;
 begin
    Wall.Vykresli(Image1.Canvas);
    Hrac.Vykresli(Image1.Canvas, Wall, Timer2);
-   if (Bomb <> nil) then
+   if ((Hrac.Bomby <> nil) or (length(Hrac.Bomby) > 0)) then
    begin
-     Bomb.Vykresli(Image1.Canvas, Wall);
-     if (Bomb.Sekund <= -1000) then
-     begin
-       for i:=0 to length(Wall.Steny)-1 do
-           for j:= 0 to length(Wall.Steny[i])-1 do
-           begin
-                if (Wall.Steny[i][j].Typ = 3) then
-                   Wall.Steny[i][j].Typ := 0;
-           end;
-     FreeAndNil(Bomb);
-     end;
+      Hrac.VykresliBombu(Image1.Canvas, Wall);
    end;
 end;
 

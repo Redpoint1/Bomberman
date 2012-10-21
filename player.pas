@@ -11,28 +11,30 @@ type
 
     { Player }
 
+    { TBomba }
+
+    TBomba = class
+      X,Y, Sekund, Radius : Integer;
+      constructor Create(XX,YY, Sec, Rad : integer);
+      procedure Odpocitavaj(Cas : integer);
+      function OverStenu(Walle : TSteny; PosX, PosY: integer): boolean;
+    end;
+
     { TPlayer }
 
     TPlayer = class
       Zivot, X, Y, SpawnX, SpawnY, Smer : Integer;
       Farba: TColor;
       PohybujeSa : boolean;
+      Bomby : array of TBomba;
       procedure Posun(klaves: Integer);
       procedure Vykresli(Obr: TCanvas; Okolie : TSteny; Cas : TTimer);
+      procedure VykresliBombu(Obr : TCanvas; Walli: TSteny);
+      procedure ZmazBomby;
+      procedure ZmazNilBomby;
       function OverPosun(klavesnica: Integer; Okolie: TSteny): Boolean;
       function OverVybuch(Okolie: TSteny): Boolean;
       constructor Create(XX,YY : Integer);
-    end;
-
-    { TBomba }
-
-    TBomba = class
-      X,Y, Sekund, Radius : Integer;
-      Farba: TColor;
-      constructor Create(XX,YY, Sec, Rad : integer);
-      procedure Odpocitavaj(Cas : integer);
-      procedure Vykresli(Obr : TCanvas; Walli: TSteny);
-      function OverStenu(Walle : TSteny; PosX, PosY: integer): boolean;
     end;
 
 
@@ -45,57 +47,12 @@ begin
   X := XX;
   Y := YY;
   Sekund := Sec*1000;
-  Farba := clBlue;
   Radius := Rad;
 end;
 
 procedure TBomba.Odpocitavaj(Cas: integer);
 begin
-    Sekund := Sekund - cas;
-end;
-
-procedure TBomba.Vykresli(Obr : TCanvas; Walli : TSteny);
-var
-  i: integer;
-begin
-  Obr.Brush.Color := Farba;
-  Obr.Pen.Color := Farba;
-  Odpocitavaj(50);
-  if (Sekund >= 0) then
-    Obr.Rectangle(x-17,y-17,x+16,y+16)
-  else
-  begin
-    for i:=(x div 33 - radius) to (x div 33) do
-    begin
-      if (OverStenu(Walli, i-2, y div 33 - 2)) then
-         Obr.Rectangle(i*33,y-17,(i+1)*33,y+16)
-      else
-          break;
-    end;
-    for i:=(x div 33) to (x div 33 + radius) do
-    begin
-      if (OverStenu(Walli, i-2, y div 33 - 2)) then
-      begin
-         Obr.Rectangle(i*33,y-17,(i+1)*33,y+16);
-      end
-      else
-          break;
-    end;
-    for i:=(y div 33) to (y div 33 + radius) do
-    begin
-      if (OverStenu(Walli, x div 33 - 2, i-2)) then
-         Obr.Rectangle(x-17,i*33,x+16,(i+1)*33)
-      else
-          break;
-    end;
-    for i:=(y div 33 - radius) to (y div 33) do
-    begin
-      if (OverStenu(Walli, x div 33 -2, i-2)) then
-         Obr.Rectangle(x-17,i*33,x+16,(i+1)*33)
-      else
-          break;
-    end;
-  end;
+  Sekund := Sekund - cas;
 end;
 
 function TBomba.OverStenu(Walle: TSteny; PosX, PosY: integer): boolean;
@@ -106,6 +63,8 @@ begin
   if (Walle.Steny[PosX][PosY].Typ = 0) then
   begin
        Walle.Steny[PosX][PosY].Typ := 3;
+       Walle.Steny[PosX][PosY].Faza := 500;
+       Walle.Steny[PosX][PosY].Farba:= clBlue;
        result := true;
   end
   else if (Walle.Steny[PosX][PosY].Typ = 3) then
@@ -140,6 +99,77 @@ begin
     Obr.Brush.Color := Farba;
     Obr.Pen.Color := Farba;
     Obr.Rectangle(X-17,Y-17,X+16,Y+16);
+end;
+
+procedure TPlayer.VykresliBombu(Obr: TCanvas; Walli: TSteny);
+var
+  i, j: integer;
+begin
+  Obr.Brush.Color := clBlue;
+  Obr.Pen.Color := clBlue;
+  for j:= 0 to length(Bomby)-1 do
+  begin
+      Bomby[j].Odpocitavaj(10);
+      if (Bomby[j].Sekund >= 0) then
+       Obr.Rectangle(Bomby[j].x-17,Bomby[j].y-17,Bomby[j].x+16,Bomby[j].y+16)
+       else
+       begin
+           Walli.Steny[Bomby[j].x div 33 - 2][Bomby[j].y div 33 - 2].Typ := 0;
+           for i:=(Bomby[j].x div 33) downto (Bomby[j].x div 33 - Bomby[j].radius) do
+           begin
+                if (Bomby[j].OverStenu(Walli, i-2, Bomby[j].y div 33 - 2)) then
+                   Obr.Rectangle(i*33,Bomby[j].y-17,(i+1)*33,Bomby[j].y+16)
+                else
+                    break;
+           end;
+           for i:=(Bomby[j].x div 33) to (Bomby[j].x div 33 + Bomby[j].radius) do
+           begin
+                if (Bomby[j].OverStenu(Walli, i-2, Bomby[j].y div 33 - 2)) then
+                     Obr.Rectangle(i*33,Bomby[j].y-17,(i+1)*33,Bomby[j].y+16)
+                else
+                    break;
+           end;
+           for i:=(Bomby[j].y div 33) to (Bomby[j].y div 33 + Bomby[j].radius) do
+           begin
+                if (Bomby[j].OverStenu(Walli, Bomby[j].x div 33 - 2, i-2)) then
+                   Obr.Rectangle(Bomby[j].x-17,i*33,Bomby[j].x+16,(i+1)*33)
+                else
+                    break;
+           end;
+           for i:=(Bomby[j].y div 33) downto (Bomby[j].y div 33 - Bomby[j].radius) do
+           begin
+                if (Bomby[j].OverStenu(Walli, Bomby[j].x div 33 -2, i-2)) then
+                   Obr.Rectangle(Bomby[j].x-17,i*33,Bomby[j].x+16,(i+1)*33)
+                else
+                    break;
+           end;
+       end;
+  end;
+  ZmazBomby;
+end;
+
+procedure TPlayer.ZmazBomby;
+var
+  i : integer;
+begin
+  for i:=0 to length(Bomby)-1 do
+      if (Bomby[i].Sekund < 0) then
+         FreeAndNil(Bomby[i]);
+  ZmazNilBomby;
+end;
+
+procedure TPlayer.ZmazNilBomby;
+var
+  i,velkost : integer;
+begin
+  velkost := 0;
+  for i:=0 to length(Bomby)-1 do
+      if (Bomby[i] = nil) then
+      begin
+        Bomby[i] := Bomby[high(Bomby)-velkost];
+        Inc(velkost);
+      end;
+  setlength(Bomby, length(Bomby)-velkost);
 end;
 
 function TPlayer.OverPosun(klavesnica: Integer; Okolie: TSteny): boolean;
@@ -190,6 +220,7 @@ begin
   Farba := clBlack;
   PohybujeSa := false;
   Smer := -1;
+  setlength(Bomby, 0);
 end;
 
 end.

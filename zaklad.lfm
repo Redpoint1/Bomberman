@@ -8,7 +8,7 @@ object Form1: TForm1
   ClientHeight = 660
   ClientWidth = 990
   OnCreate = FormCreate
-  OnKeyUp = FormKeyUp
+  OnKeyDown = FormKeyDown
   LCLVersion = '1.0.2.0'
   object Image1: TImage
     Left = 0
@@ -18,14 +18,14 @@ object Form1: TForm1
     Align = alClient
   end
   object Timer1: TTimer
-    Interval = 20
+    Interval = 10
     OnTimer = Timer1Timer
     left = 920
     top = 608
   end
   object Timer2: TTimer
     Enabled = False
-    Interval = 20
+    Interval = 10
     OnTimer = Timer2Timer
     left = 864
     top = 600
