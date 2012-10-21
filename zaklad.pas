@@ -53,8 +53,16 @@ begin
       SetLength(Wall.Steny[i], Length(Wall.Steny[i])+1);
       if (((i mod 2) = 1) and ((j mod 2) = 1)) then
       begin
+         if ((i mod 4) = 3) and ((j mod 4) = 3) then
+         begin
+         Wall.Steny[i][j] := TStena.Create(i*pixel+17+2*pixel, j*pixel+17+2*pixel, 4);
+         Wall.ZmenFarbu(i,j, clGreen);
+         end
+         else
+         begin
          Wall.Steny[i][j] := TStena.Create(i*pixel+17+2*pixel, j*pixel+17+2*pixel, 1);
          Wall.ZmenFarbu(i,j, clRed);
+         end;
       end
       else
       begin

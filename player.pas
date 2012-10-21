@@ -60,11 +60,17 @@ begin
   result := false;
   if ((PosX < 0) or (PosY < 0) or (PosX >= length(Walle.Steny)) or (PosY >= length(Walle.Steny[PosX]))) then
      exit;
+  if (Walle.Steny[PosX][PosY].Typ = 4) then
+  begin
+    Walle.Steny[PosX][PosY].Typ := 3;
+    Walle.Steny[PosX][PosY].Faza := 500;
+    result := false;
+    exit;
+  end;
   if (Walle.Steny[PosX][PosY].Typ = 0) then
   begin
        Walle.Steny[PosX][PosY].Typ := 3;
        Walle.Steny[PosX][PosY].Faza := 500;
-       Walle.Steny[PosX][PosY].Farba:= clBlue;
        result := true;
   end
   else if (Walle.Steny[PosX][PosY].Typ = 3) then
