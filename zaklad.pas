@@ -50,8 +50,7 @@ begin
   Wall.Nacitaj('level', Image1.Height, Image1.Width);
   Hrac := TPlayer.Create(2 * 33 + 17, 2 * 33 + 17);
   Nepriatel := TNepriatel.Create();
-  Nepriatel.Pridaj(20 * 33 + 17, 2 * 33 + 17, 1);
-  Nepriatel.Pridaj(10 * 33 + 17, 14 * 33 + 17, 1);
+  Nepriatel.Nacitaj('level');
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);

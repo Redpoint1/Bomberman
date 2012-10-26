@@ -31,6 +31,7 @@ type
     procedure VyberSmer(Komu: TNpc);
     procedure Posun(Koho: TNpc);
     procedure OverVybuch(Okolie: TSteny);
+    procedure Nacitaj(S: string);
     function OverPosun(Komu: TNpc; Okolie: TSteny): boolean;
   end;
 
@@ -166,6 +167,30 @@ begin
       FreeAndNil(NPC[i]);
 end;
 
+procedure TNepriatel.Nacitaj(S: string);
+var
+  Sub: TextFile;
+  X, Y, Typ: integer;
+begin
+  if fileexists(S + '.txt') then
+  begin
+    AssignFile(Sub, S + '.txt');
+    Reset(Sub);
+    Readln(Sub, Y);
+    repeat
+      readln(Sub);
+      Dec(Y);
+    until Y = -2;
+    repeat
+      Read(Sub, X);
+      Read(Sub, Y);
+      Readln(Sub, Typ);
+      Pridaj(X, Y, Typ);
+    until EOF(Sub);
+    CloseFile(Sub);
+  end;
+end;
+
 function TNepriatel.OverPosun(Komu: TNpc; Okolie: TSteny): boolean;
 begin
   Result := False;
@@ -206,8 +231,8 @@ end;
 
 constructor TNpc.Create(XX, YY, TypNPC: integer);
 begin
-  X := XX;
-  Y := YY;
+  X := (XX + 1) * 33 + 17;
+  Y := (YY + 1) * 33 + 17;
   Typ := TypNPC;
   Smer := 0;
   PohybujeSa := False;

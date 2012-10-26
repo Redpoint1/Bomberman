@@ -95,13 +95,16 @@ end;
 
 procedure TSteny.Nacitaj(Subor: string; Vyska, Sirka: integer);
 var
-  t: integer;
+  t, x, y: integer;
   Sub: TextFile;
 begin
   if fileexists(Subor + '.txt') then
   begin
     AssignFile(Sub, Subor + '.txt');
     Reset(Sub);
+    Read(Sub, Y);
+    Readln(Sub, X);
+    Readln(Sub);
     repeat
       begin
         if (Length(Steny) <= ((Vyska div 33) - 5)) then
@@ -122,11 +125,11 @@ begin
                 end;
               end;
             end;
-          until EoLn(Sub);
+          until Length(Steny[high(Steny)]) = X;
         end;
         readln(Sub);
       end;
-    until EOF(Sub);
+    until Length(Steny) = Y;
     CloseFile(Sub);
   end;
 end;
