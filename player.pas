@@ -5,7 +5,7 @@ unit player;
 interface
 
 uses
-  Classes, SysUtils, Graphics, ExtCtrls, Dialogs, game;
+  Classes, SysUtils, Graphics, ExtCtrls, Dialogs, game, npc;
 
 type
 
@@ -28,10 +28,11 @@ type
     PohybujeSa: boolean;
     Bomby: array of TBomba;
     procedure Posun(klaves: integer);
-    procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Cas: TTimer);
+    procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel : TNepriatel; Cas: TTimer);
     procedure VykresliBombu(Obr: TCanvas; Walli: TSteny);
     procedure ZmazBomby;
     procedure ZmazNilBomby;
+    function OverNpc(Nepriatel : TNepriatel): boolean;
     function OverPosun(Okolie: TSteny): boolean;
     function OverVybuch(Okolie: TSteny): boolean;
     constructor Create(XX, YY: integer);
@@ -90,9 +91,9 @@ begin
   end;
 end;
 
-procedure TPlayer.Vykresli(Obr: TCanvas; Okolie: TSteny; Cas: TTimer);
+procedure TPlayer.Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel : TNepriatel; Cas: TTimer);
 begin
-  if (OverVybuch(Okolie)) then
+  if ((OverVybuch(Okolie)) or (OverNpc(Nepriatel))) then
   begin
     if (Cas.Enabled) then
     begin
@@ -177,6 +178,19 @@ begin
       Inc(velkost);
     end;
   setlength(Bomby, length(Bomby) - velkost);
+end;
+
+function TPlayer.OverNpc(Nepriatel: TNepriatel) : boolean;
+var
+  i: integer;
+begin
+     result := false;
+     for i:=0 to length(Nepriatel.NPC)-1 do
+         if (sqrt(((X - Nepriatel.NPC[i].X)*(X - Nepriatel.NPC[i].X)) + ((Y - Nepriatel.NPC[i].Y)*(Y - Nepriatel.NPC[i].Y))) < 25 ) then
+         begin
+           result := true;
+           exit;
+         end;
 end;
 
 function TPlayer.OverPosun(Okolie: TSteny): boolean;

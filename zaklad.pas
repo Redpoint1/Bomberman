@@ -93,7 +93,7 @@ begin
   end;
   if ((Hrac.Bomby <> nil) or (length(Hrac.Bomby) > 0)) then
     Hrac.VykresliBombu(Image1.Canvas, Wall);
-  Hrac.Vykresli(Image1.Canvas, Wall, Timer2);
+  Hrac.Vykresli(Image1.Canvas, Wall, Nepriatel, Timer2);
 end;
 
 procedure TForm1.Timer2Timer(Sender: TObject);

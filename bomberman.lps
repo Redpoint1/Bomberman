@@ -9,7 +9,7 @@
         <Filename Value="bomberman.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="bomberman"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="55"/>
       </Unit0>
       <Unit1>
         <Filename Value="zaklad.pas"/>
@@ -20,9 +20,9 @@
         <UnitName Value="zaklad"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="52"/>
-        <CursorPos X="8" Y="92"/>
-        <UsageCount Value="54"/>
+        <TopLine Value="76"/>
+        <CursorPos X="48" Y="96"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -30,23 +30,23 @@
         <Filename Value="player.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="player"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="16"/>
-        <CursorPos X="7" Y="210"/>
-        <UsageCount Value="53"/>
+        <TopLine Value="180"/>
+        <CursorPos X="22" Y="187"/>
+        <UsageCount Value="54"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="game.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="game"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="50"/>
+        <TopLine Value="122"/>
         <CursorPos X="11" Y="63"/>
-        <UsageCount Value="52"/>
+        <UsageCount Value="53"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
@@ -57,7 +57,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="155"/>
         <CursorPos X="71" Y="165"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
@@ -140,123 +140,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="npc.pas"/>
-        <Caret Line="105" Column="1" TopLine="74"/>
+        <Caret Line="57" Column="7" TopLine="34"/>
       </Position1>
       <Position2>
-        <Filename Value="npc.pas"/>
-        <Caret Line="57" Column="7" TopLine="34"/>
+        <Filename Value="zaklad.pas"/>
+        <Caret Line="117" Column="7" TopLine="98"/>
       </Position2>
       <Position3>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="117" Column="7" TopLine="98"/>
+        <Caret Line="122" Column="43" TopLine="96"/>
       </Position3>
       <Position4>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="122" Column="43" TopLine="96"/>
+        <Caret Line="46" Column="46" TopLine="33"/>
       </Position4>
       <Position5>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="46" Column="46" TopLine="33"/>
+        <Caret Line="113" Column="8" TopLine="96"/>
       </Position5>
       <Position6>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="113" Column="8" TopLine="96"/>
+        <Caret Line="121" Column="10" TopLine="96"/>
       </Position6>
       <Position7>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="121" Column="10" TopLine="96"/>
+        <Caret Line="113" Column="6" TopLine="98"/>
       </Position7>
       <Position8>
-        <Filename Value="zaklad.pas"/>
-        <Caret Line="113" Column="6" TopLine="98"/>
+        <Filename Value="npc.pas"/>
+        <Caret Line="69" Column="30" TopLine="49"/>
       </Position8>
       <Position9>
         <Filename Value="npc.pas"/>
-        <Caret Line="69" Column="30" TopLine="49"/>
+        <Caret Line="35" Column="19" TopLine="16"/>
       </Position9>
       <Position10>
         <Filename Value="npc.pas"/>
-        <Caret Line="35" Column="19" TopLine="16"/>
+        <Caret Line="30" Column="27" TopLine="10"/>
       </Position10>
       <Position11>
         <Filename Value="npc.pas"/>
-        <Caret Line="30" Column="27" TopLine="10"/>
+        <Caret Line="31" Column="9" TopLine="17"/>
       </Position11>
       <Position12>
         <Filename Value="npc.pas"/>
-        <Caret Line="31" Column="9" TopLine="17"/>
+        <Caret Line="32" Column="68" TopLine="17"/>
       </Position12>
       <Position13>
         <Filename Value="npc.pas"/>
-        <Caret Line="32" Column="68" TopLine="17"/>
+        <Caret Line="33" Column="23" TopLine="13"/>
       </Position13>
       <Position14>
         <Filename Value="npc.pas"/>
-        <Caret Line="33" Column="23" TopLine="13"/>
+        <Caret Line="24" Column="59" TopLine="7"/>
       </Position14>
       <Position15>
         <Filename Value="npc.pas"/>
-        <Caret Line="24" Column="59" TopLine="7"/>
+        <Caret Line="29" Column="39" TopLine="7"/>
       </Position15>
       <Position16>
         <Filename Value="npc.pas"/>
-        <Caret Line="29" Column="39" TopLine="7"/>
+        <Caret Line="197" Column="5" TopLine="170"/>
       </Position16>
       <Position17>
         <Filename Value="npc.pas"/>
-        <Caret Line="197" Column="5" TopLine="170"/>
+        <Caret Line="92" Column="41" TopLine="78"/>
       </Position17>
       <Position18>
-        <Filename Value="npc.pas"/>
-        <Caret Line="92" Column="41" TopLine="78"/>
+        <Filename Value="zaklad.pas"/>
+        <Caret Line="23" Column="44" TopLine="1"/>
       </Position18>
       <Position19>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="23" Column="44" TopLine="1"/>
+        <Caret Line="22" Column="44" TopLine="1"/>
       </Position19>
       <Position20>
-        <Filename Value="zaklad.pas"/>
-        <Caret Line="22" Column="44" TopLine="1"/>
+        <Filename Value="npc.pas"/>
+        <Caret Line="33" Column="42" TopLine="13"/>
       </Position20>
       <Position21>
         <Filename Value="npc.pas"/>
-        <Caret Line="33" Column="42" TopLine="13"/>
+        <Caret Line="32" Column="31" TopLine="10"/>
       </Position21>
       <Position22>
         <Filename Value="npc.pas"/>
-        <Caret Line="32" Column="31" TopLine="10"/>
+        <Caret Line="141" Column="23" TopLine="120"/>
       </Position22>
       <Position23>
         <Filename Value="npc.pas"/>
-        <Caret Line="141" Column="23" TopLine="120"/>
+        <Caret Line="77" Column="18" TopLine="62"/>
       </Position23>
       <Position24>
-        <Filename Value="npc.pas"/>
-        <Caret Line="77" Column="18" TopLine="62"/>
+        <Filename Value="zaklad.pas"/>
+        <Caret Line="49" Column="3" TopLine="45"/>
       </Position24>
       <Position25>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="49" Column="3" TopLine="45"/>
+        <Caret Line="48" Column="3" TopLine="38"/>
       </Position25>
       <Position26>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="48" Column="3" TopLine="38"/>
+        <Caret Line="47" Column="33" TopLine="33"/>
       </Position26>
       <Position27>
-        <Filename Value="zaklad.pas"/>
-        <Caret Line="47" Column="33" TopLine="33"/>
+        <Filename Value="npc.pas"/>
+        <Caret Line="33" Column="38" TopLine="13"/>
       </Position27>
       <Position28>
         <Filename Value="npc.pas"/>
-        <Caret Line="33" Column="38" TopLine="13"/>
+        <Caret Line="71" Column="14" TopLine="57"/>
       </Position28>
       <Position29>
         <Filename Value="npc.pas"/>
-        <Caret Line="71" Column="14" TopLine="57"/>
+        <Caret Line="165" Column="27" TopLine="151"/>
       </Position29>
       <Position30>
-        <Filename Value="npc.pas"/>
-        <Caret Line="165" Column="27" TopLine="151"/>
+        <Filename Value="player.pas"/>
+        <Caret Line="35" Column="35" TopLine="22"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>
