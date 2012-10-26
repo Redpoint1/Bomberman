@@ -58,18 +58,17 @@ procedure TSteny.ZmenFazu;
 var
   xokolie, yokolie: integer;
 begin
-  for xokolie := 0 to length(Steny) - 1 do
-    for yokolie := 0 to length(Steny[xokolie]) - 1 do
-      if (((Steny[xokolie][yokolie].Typ = 3) or
-        (Steny[xokolie][yokolie].Typ = 2)) and (Steny[xokolie][yokolie].Faza = 0)) then
+  for yokolie := 0 to length(Steny) - 1 do
+    for xokolie := 0 to length(Steny[yokolie]) - 1 do
+      if ((Steny[yokolie][xokolie].Typ = 3) and (Steny[yokolie][xokolie].Faza = 0)) then
       begin
-        Steny[xokolie][yokolie].Typ := 0;
-        Steny[xokolie][yokolie].Farba := clWhite;
-        Steny[xokolie][yokolie].Faza := Steny[xokolie][yokolie].Faza - 1;
+        Steny[yokolie][xokolie].Typ := 0;
+        Steny[yokolie][xokolie].Farba := clWhite;
+        Steny[yokolie][xokolie].Faza := Steny[yokolie][xokolie].Faza - 1;
       end
-      else if (Steny[xokolie][yokolie].Faza > 0) then
+      else if (Steny[yokolie][xokolie].Faza > 0) then
       begin
-        Steny[xokolie][yokolie].Faza := Steny[xokolie][yokolie].Faza - 10;
+        Steny[yokolie][xokolie].Faza := Steny[yokolie][xokolie].Faza - 10;
       end;
 end;
 

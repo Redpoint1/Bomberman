@@ -7,6 +7,7 @@ object Form1: TForm1
   Caption = 'Form1'
   ClientHeight = 660
   ClientWidth = 990
+  Color = clFuchsia
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   LCLVersion = '1.0.2.0'
@@ -28,12 +29,6 @@ object Form1: TForm1
     Interval = 10
     OnTimer = Timer2Timer
     left = 872
-    top = 608
-  end
-  object Timer3: TTimer
-    Interval = 10
-    OnTimer = Timer3Timer
-    left = 824
     top = 608
   end
 end
