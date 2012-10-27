@@ -14,25 +14,28 @@ type
   { TBomba }
 
   TBomba = class
-    X, Y, Sekund, Radius: integer;
+    X, Y, Sekund, Radius, Faza: integer;
+    Obr: array[0..1] of TBitmap;
     constructor Create(XX, YY, Sec, Rad: integer);
     procedure Odpocitavaj(Cas: integer);
-    function OverStenu(Walle: TSteny; PosY, PosX: integer): boolean;
+    function OverStenu(Walle: TSteny; PosY, PosX, Smer: integer): boolean;
   end;
 
   { TPlayer }
 
   TPlayer = class
-    Zivot, X, Y, SpawnX, SpawnY, Smer: integer;
+    Zivot, X, Y, SpawnX, SpawnY, Smer, Faza: integer;
     Farba: TColor;
     PohybujeSa: boolean;
     Bomby: array of TBomba;
+    BombyObr: array[0..1] of TBitMap;
     procedure Posun(klaves: integer);
-    procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel : TNepriatel; Cas: TTimer);
+    procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel;
+      Cas: TTimer);
     procedure VykresliBombu(Obr: TCanvas; Walli: TSteny);
     procedure ZmazBomby;
     procedure ZmazNilBomby;
-    function OverNpc(Nepriatel : TNepriatel): boolean;
+    function OverNpc(Nepriatel: TNepriatel): boolean;
     function OverPosun(Okolie: TSteny): boolean;
     function OverVybuch(Okolie: TSteny): boolean;
     constructor Create(XX, YY: integer);
@@ -49,6 +52,7 @@ begin
   Y := YY;
   Sekund := Sec * 1000;
   Radius := Rad;
+  Faza := 0;
 end;
 
 procedure TBomba.Odpocitavaj(Cas: integer);
@@ -56,7 +60,7 @@ begin
   Sekund := Sekund - cas;
 end;
 
-function TBomba.OverStenu(Walle: TSteny; PosY, PosX: integer): boolean;
+function TBomba.OverStenu(Walle: TSteny; PosY, PosX, Smer: integer): boolean;
 begin
   Result := False;
   if ((PosX < 0) or (PosY < 0) or (PosY >= length(Walle.Steny)) or
@@ -64,8 +68,8 @@ begin
     exit;
   if (Walle.Steny[PosY][PosX].Typ = 4) then
   begin
-    Walle.Steny[PosY][PosX].Typ := 3;
-    Walle.Steny[PosY][PosX].Faza := 500;
+    Walle.Steny[PosY][PosX].Typ := 0;
+    Walle.Steny[PosY][PosX].Obraz := Walle.StenyObr[0];
     Result := False;
     exit;
   end;
@@ -74,9 +78,24 @@ begin
     Walle.Steny[PosY][PosX].Typ := 3;
     Walle.Steny[PosY][PosX].Faza := 500;
     Result := True;
+    case Smer of
+      0: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4];
+      1: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4];
+      2: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
+      3: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
+    end;
   end
   else if (Walle.Steny[PosY][PosX].Typ = 3) then
+  begin
+    case Smer of
+      0: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4]; // rozhodnut ktore lepsie
+      1: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4];
+      2: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
+      3: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
+    end;
+    Walle.Steny[PosY][PosX].Faza := 500;
     Result := True;
+  end;
 end;
 
 { Player }
@@ -91,7 +110,8 @@ begin
   end;
 end;
 
-procedure TPlayer.Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel : TNepriatel; Cas: TTimer);
+procedure TPlayer.Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel;
+  Cas: TTimer);
 begin
   if ((OverVybuch(Okolie)) or (OverNpc(Nepriatel))) then
   begin
@@ -113,44 +133,67 @@ procedure TPlayer.VykresliBombu(Obr: TCanvas; Walli: TSteny);
 var
   i, j: integer;
 begin
-  Obr.Brush.Color := clBlue;
-  Obr.Pen.Color := clBlue;
   for j := 0 to length(Bomby) - 1 do
   begin
     Bomby[j].Odpocitavaj(10);
+    Bomby[j].Faza := (Bomby[j].Sekund div 500) mod 2;
     if (Bomby[j].Sekund >= 0) then
-      Obr.Rectangle(Bomby[j].x - 17, Bomby[j].y - 17, Bomby[j].x + 16, Bomby[j].y + 16)
+      Obr.Draw(Bomby[j].x - 17, Bomby[j].y - 17, BombyObr[Bomby[j].Faza])
     else
     begin
       Walli.Steny[Bomby[j].y div 33 - 2][Bomby[j].x div 33 - 2].Typ := 0;
       for i := (Bomby[j].x div 33) downto (Bomby[j].x div 33 - Bomby[j].radius) do
+        //dolava
       begin
-        if (Bomby[j].OverStenu(Walli, Bomby[j].y div 33 - 2, i - 2)) then
-          Obr.Rectangle(i * 33, Bomby[j].y - 17, (i + 1) * 33, Bomby[j].y + 16)
+        if (Bomby[j].OverStenu(Walli, Bomby[j].y div 33 - 2, i - 2, 2)) then
+        begin
+          if (i = (Bomby[j].x div 33 - Bomby[j].radius)) then
+            Walli.Steny[Bomby[j].y div 33 - 2][i - 2].Obraz := Walli.BombyObr[0][0];
+        end
         else
+        begin
           break;
+        end;
       end;
-      for i := (Bomby[j].x div 33) to (Bomby[j].x div 33 + Bomby[j].radius) do
+      for i := (Bomby[j].x div 33) to (Bomby[j].x div 33 + Bomby[j].radius) do //doprava
       begin
-        if (Bomby[j].OverStenu(Walli, Bomby[j].y div 33 - 2, i - 2)) then
-          Obr.Rectangle(i * 33, Bomby[j].y - 17, (i + 1) * 33, Bomby[j].y + 16)
+        if (Bomby[j].OverStenu(Walli, Bomby[j].y div 33 - 2, i - 2, 3)) then
+        begin
+          if (i = (Bomby[j].x div 33 + Bomby[j].radius)) then
+            Walli.Steny[Bomby[j].y div 33 - 2][i - 2].Obraz := Walli.BombyObr[0][3];
+        end
         else
+        begin
           break;
+        end;
       end;
-      for i := (Bomby[j].y div 33) to (Bomby[j].y div 33 + Bomby[j].radius) do
+      for i := (Bomby[j].y div 33) to (Bomby[j].y div 33 + Bomby[j].radius) do //dole
       begin
-        if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div 33 - 2)) then
-          Obr.Rectangle(Bomby[j].x - 17, i * 33, Bomby[j].x + 16, (i + 1) * 33)
+        if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div 33 - 2, 1)) then
+        begin
+          if (i = (Bomby[j].y div 33 + Bomby[j].radius)) then
+            Walli.Steny[i - 2][Bomby[j].x div 33 - 2].Obraz := Walli.BombyObr[0][6];
+        end
         else
+        begin
           break;
+        end;
       end;
       for i := (Bomby[j].y div 33) downto (Bomby[j].y div 33 - Bomby[j].radius) do
+        //hore
       begin
-        if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div 33 - 2)) then
-          Obr.Rectangle(Bomby[j].x - 17, i * 33, Bomby[j].x + 16, (i + 1) * 33)
+        if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div 33 - 2, 0)) then
+        begin
+          if (i = (Bomby[j].y div 33 - Bomby[j].radius)) then
+            Walli.Steny[i - 2][Bomby[j].x div 33 - 2].Obraz := Walli.BombyObr[0][5];
+        end
         else
+        begin
           break;
+        end;
       end;
+      Walli.Steny[Bomby[j].y div 33 - 2][Bomby[j].x div 33 - 2].Obraz :=
+        Walli.BombyObr[0][2];
     end;
   end;
   ZmazBomby;
@@ -180,17 +223,18 @@ begin
   setlength(Bomby, length(Bomby) - velkost);
 end;
 
-function TPlayer.OverNpc(Nepriatel: TNepriatel) : boolean;
+function TPlayer.OverNpc(Nepriatel: TNepriatel): boolean;
 var
   i: integer;
 begin
-     result := false;
-     for i:=0 to length(Nepriatel.NPC)-1 do
-         if (sqrt(((X - Nepriatel.NPC[i].X)*(X - Nepriatel.NPC[i].X)) + ((Y - Nepriatel.NPC[i].Y)*(Y - Nepriatel.NPC[i].Y))) < 25 ) then
-         begin
-           result := true;
-           exit;
-         end;
+  Result := False;
+  for i := 0 to length(Nepriatel.NPC) - 1 do
+    if (sqrt(((X - Nepriatel.NPC[i].X) * (X - Nepriatel.NPC[i].X)) +
+      ((Y - Nepriatel.NPC[i].Y) * (Y - Nepriatel.NPC[i].Y))) < 25) then
+    begin
+      Result := True;
+      exit;
+    end;
 end;
 
 function TPlayer.OverPosun(Okolie: TSteny): boolean;
@@ -236,6 +280,9 @@ begin
 end;
 
 constructor TPlayer.Create(XX, YY: integer);
+var
+  Obrazok: TBitMap;
+  i: integer;
 begin
   Zivot := 3;
   X := XX;
@@ -246,6 +293,19 @@ begin
   PohybujeSa := False;
   Smer := -1;
   setlength(Bomby, 0);
+  Obrazok := TBitmap.Create;
+  Obrazok.LoadFromFile('img/bomba.bmp');
+  for i := 0 to 1 do
+  begin
+    BombyObr[i] := TBitmap.Create;
+    BombyObr[i].Width := 33;
+    BombyObr[i].Height := 33;
+    BombyObr[i].Transparent := True;
+    BombyObr[i].TransparentColor := clFuchsia;
+    BombyObr[i].PixelFormat := pf24bit;
+    BombyObr[i].Canvas.Draw(-i * 33, -0, Obrazok);
+  end;
+  Obrazok.Free;
 end;
 
 end.

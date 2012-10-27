@@ -13,6 +13,7 @@ type
 
   TStena = class
     X, Y, Typ, Faza: integer;
+    Obraz : TBitmap;
     Farba: TColor;
     constructor Create(XX, YY, TypSteny: integer);
   end;
@@ -21,11 +22,14 @@ type
 
   TSteny = class
     Steny: array of array of TStena;
+    StenyObr: array[0..4] of TBitMap;
+    BombyObr: array[0..0] of array[0..6] of TBitMap;
     procedure ZmenFarbu(X, Y: integer; Farby: TColor);
     procedure Vykresli(Obr: TCanvas);
     procedure ZmenFazu;
     procedure VykresliFazu;
     procedure Nacitaj(Subor: string; Vyska, Sirka: integer);
+    procedure PriradObraz;
     constructor Create();
   end;
 
@@ -42,16 +46,10 @@ procedure TSteny.Vykresli(Obr: TCanvas);
 var
   i, j: integer;
 begin
-  ZmenFazu;
-  VykresliFazu;
   for i := 0 to length(Steny) - 1 do
     for j := 0 to length(Steny[i]) - 1 do
-    begin
-      Obr.Pen.Color := Steny[i][j].Farba;
-      Obr.Brush.Color := Steny[i][j].Farba;
-      Obr.Rectangle(Steny[i][j].X - 17, Steny[i][j].Y - 17, Steny[i][j].X + 16,
-        Steny[i][j].Y + 16);
-    end;
+      Obr.Draw(Steny[i][j].X - 17, Steny[i][j].Y - 17, Steny[i][j].Obraz);
+  VykresliFazu;
 end;
 
 procedure TSteny.ZmenFazu;
@@ -63,7 +61,7 @@ begin
       if ((Steny[yokolie][xokolie].Typ = 3) and (Steny[yokolie][xokolie].Faza = 0)) then
       begin
         Steny[yokolie][xokolie].Typ := 0;
-        Steny[yokolie][xokolie].Farba := clWhite;
+        Steny[yokolie][xokolie].Obraz := StenyObr[0];
         Steny[yokolie][xokolie].Faza := Steny[yokolie][xokolie].Faza - 1;
       end
       else if (Steny[yokolie][xokolie].Faza > 0) then
@@ -77,20 +75,20 @@ var
   i, j: integer;
 begin
   ZmenFazu;
-  for i := 0 to length(Steny) - 1 do
-    for j := 0 to length(Steny[i]) - 1 do
-    begin
-      if (Steny[i][j].Typ = 3) then
-      begin
-        case (Steny[i][j].Faza div 100) of
-          4: Steny[i][j].Farba := RGBToColor(1 * 42, 1 * 42, 1 * 42);
-          3: Steny[i][j].Farba := RGBToColor(2 * 42, 2 * 42, 2 * 42);
-          2: Steny[i][j].Farba := RGBToColor(3 * 42, 3 * 42, 3 * 42);
-          1: Steny[i][j].Farba := RGBToColor(4 * 42, 4 * 42, 4 * 42);
-          0: Steny[i][j].Farba := RGBToColor(5 * 42, 5 * 42, 5 * 42);
-        end;
-      end;
-    end;
+  //for i := 0 to length(Steny) - 1 do
+  //  for j := 0 to length(Steny[i]) - 1 do
+  //  begin
+  //    if (Steny[i][j].Typ = 3) then
+  //    begin
+  //      case (Steny[i][j].Faza div 100) of
+  //        4: Steny[i][j].Farba := RGBToColor(1 * 42, 1 * 42, 1 * 42);
+  //        3: Steny[i][j].Farba := RGBToColor(2 * 42, 2 * 42, 2 * 42);
+  //        2: Steny[i][j].Farba := RGBToColor(3 * 42, 3 * 42, 3 * 42);
+  //        1: Steny[i][j].Farba := RGBToColor(4 * 42, 4 * 42, 4 * 42);
+  //        0: Steny[i][j].Farba := RGBToColor(5 * 42, 5 * 42, 5 * 42);
+  //      end;
+  //    end;
+  //  end;
 end;
 
 procedure TSteny.Nacitaj(Subor: string; Vyska, Sirka: integer);
@@ -132,11 +130,52 @@ begin
     until Length(Steny) = Y;
     CloseFile(Sub);
   end;
+  PriradObraz;
+end;
+
+procedure TSteny.PriradObraz;
+var
+  i,j : integer;
+begin
+for i:=0 to length(Steny)-1 do
+    for j:=0 to length(Steny[i])-1 do
+    begin
+      if ((Steny[i][j].Typ < 2) or (Steny[i][j].Typ = 4)) then
+         Steny[i][j].Obraz := StenyObr[Steny[i][j].Typ];
+    end;
 end;
 
 constructor TSteny.Create;
+var
+  Obrazok : TBitMap;
+  i, j: integer;
 begin
   SetLength(Steny, 0);
+  Obrazok := TBitmap.Create;
+  Obrazok.LoadFromFile('img/steny.bmp');
+  for i := 0 to length(StenyObr)-1 do
+  begin
+      StenyObr[i] := TBitmap.Create;
+      StenyObr[i].Width := 33;
+      StenyObr[i].Height := 33;
+      StenyObr[i].Transparent := True;
+      StenyObr[i].TransparentColor:= clFuchsia;
+      StenyObr[i].PixelFormat := pf24bit;
+      StenyObr[i].Canvas.Draw(-i*33, -0, Obrazok);
+  end;
+  Obrazok.LoadFromFile('img/bomba.bmp');
+  for i := 0 to 0 do
+    for j := 0 to 6 do
+    begin
+      BombyObr[i][j] := TBitmap.Create;
+      BombyObr[i][j].Width := 33;
+      BombyObr[i][j].Height := 33;
+      BombyObr[i][j].Transparent := True;
+      BombyObr[i][j].TransparentColor := clFuchsia;
+      BombyObr[i][j].PixelFormat := pf24bit;
+      BombyObr[i][j].Canvas.Draw(-j * 33, (-i-1) * 33, Obrazok);
+    end;
+  Obrazok.Free;
 end;
 
 { TStena }
