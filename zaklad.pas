@@ -67,7 +67,6 @@ begin
   end;
   if not (Hrac.PohybujeSa) then
   begin
-    Hrac.Smer := -1;
     case Key of
       VK_UP: Hrac.Smer := 0;
       VK_DOWN: Hrac.Smer := 1;
@@ -76,6 +75,8 @@ begin
     end;
     if (Hrac.OverPosun(Wall) and (Hrac.Smer > -1)) then
     begin
+      Hrac.Faza := 33;
+      Hrac.Opacne := False;
       Hrac.PohybujeSa := True;
       Timer2.Enabled := True;
     end;
@@ -85,10 +86,10 @@ end;
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
   Wall.Vykresli(Image1.Canvas);
-  if (length(Nepriatel.NPC) > 0)then
+  if (length(Nepriatel.NPC) > 0) then
   begin
-       Nepriatel.Casovac;
-       Nepriatel.Vykresli(Image1.Canvas, Wall);
+    Nepriatel.Casovac;
+    Nepriatel.Vykresli(Image1.Canvas, Wall);
   end;
   if ((Hrac.Bomby <> nil) or (length(Hrac.Bomby) > 0)) then
     Hrac.VykresliBombu(Image1.Canvas, Wall);

@@ -26,10 +26,10 @@ type
   TPlayer = class
     Zivot, X, Y, SpawnX, SpawnY, Smer, Faza: integer;
     Farba: TColor;
-    PohybujeSa: boolean;
+    PohybujeSa, Opacne: boolean;
     Bomby: array of TBomba;
     BombyObr: array[0..3] of TBitMap;
-    HracObr: array[0..3] of array[0..2] of TBitMap;
+    HracObr: array[0..4] of array[0..2] of TBitMap;
     procedure Posun(klaves: integer);
     procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel;
       Cas: TTimer);
@@ -135,7 +135,18 @@ begin
     Y := SpawnY;
     Zivot := Zivot - 1;
   end;
-  Obr.Draw(X - 17, Y - 17, HracObr[1][0]);
+  if (PohybujeSa) then
+  begin
+    if (Faza <= 0) then
+      opacne := True;
+    if (Faza >= 33) then
+      opacne := False;
+    if (Opacne) then
+      Inc(Faza)
+    else
+      Dec(Faza);
+  end;
+  Obr.Draw(X - 17, Y - 17, HracObr[Smer][Faza div 11]);
 end;
 
 procedure TPlayer.VykresliBombu(Obr: TCanvas; Walli: TSteny);
@@ -313,7 +324,8 @@ begin
   SpawnY := YY;
   Farba := clBlack;
   PohybujeSa := False;
-  Smer := -1;
+  Opacne := False;
+  Smer := 0;
   setlength(Bomby, 0);
   Obrazok := TBitmap.Create;
   Obrazok.LoadFromFile('img/bomba.bmp');
@@ -328,14 +340,14 @@ begin
     BombyObr[i].Canvas.Draw(-i * 33, -0, Obrazok);
   end;
   Obrazok.LoadFromFile('img/player.bmp');
-  for j := 0 to 3 do
-    for i := 0 to 1 do
+  for j := 0 to 4 do
+    for i := 0 to 2 do
     begin
       HracObr[j][i] := TBitmap.Create;
       HracObr[j][i].Width := 33;
       HracObr[j][i].Height := 33;
       HracObr[j][i].Transparent := True;
-      HracObr[j][i].TransparentColor := Obrazok.Canvas.Pixels[0,0];
+      HracObr[j][i].TransparentColor := Obrazok.Canvas.Pixels[0, 0];
       HracObr[j][i].PixelFormat := pf24bit;
       HracObr[j][i].Canvas.Draw(-i * 33, -j * 33, Obrazok);
     end;

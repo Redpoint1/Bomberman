@@ -22,7 +22,7 @@ type
 
   TNepriatel = class
     NPC: array of TNpc;
-    NpcObr : array[0..0] of array[0..1] of TBitMap;
+    NpcObr: array[0..0] of array[0..1] of TBitMap;
     procedure Pridaj(XX, YY, Typ: integer);
     procedure vymazNilNpc;
     constructor Create();
@@ -62,7 +62,7 @@ end;
 
 constructor TNepriatel.Create;
 var
-  Obrazok : TBitMap;
+  Obrazok: TBitMap;
   i, j: integer;
 begin
   setLength(NPC, 0);
@@ -75,7 +75,7 @@ begin
       NpcObr[i][j].Width := 33;
       NpcObr[i][j].Height := 33;
       NpcObr[i][j].Transparent := True;
-      NpcObr[i][j].TransparentColor := Obrazok.Canvas.Pixels[0,0];
+      NpcObr[i][j].TransparentColor := Obrazok.Canvas.Pixels[0, 0];
       NpcObr[i][j].PixelFormat := pf24bit;
       NpcObr[i][j].Canvas.Draw(-j * 33, -i * 33, Obrazok);
     end;
@@ -137,7 +137,7 @@ begin
     else
       Kto.PohybujeSa := False;
   if (Kto.faza = 0) then
-     Kto.Faza := 100;
+    Kto.Faza := 100;
   Dec(Kto.Faza, 1);
 end;
 

@@ -13,7 +13,7 @@ type
 
   TStena = class
     X, Y, Typ, Faza, BombaSmer: integer;
-    Obraz : TBitmap;
+    Obraz: TBitmap;
     Farba: TColor;
     constructor Create(XX, YY, TypSteny: integer);
   end;
@@ -62,7 +62,7 @@ begin
       begin
         Steny[yokolie][xokolie].Typ := 0;
         Steny[yokolie][xokolie].Obraz := StenyObr[0];
-        Steny[yokolie][xokolie].BombaSmer:= 0;
+        Steny[yokolie][xokolie].BombaSmer := 0;
         Steny[yokolie][xokolie].Faza := Steny[yokolie][xokolie].Faza - 1;
       end
       else if (Steny[yokolie][xokolie].Faza > 0) then
@@ -115,7 +115,9 @@ begin
               if (Length(Steny[high(Steny)]) <= ((Sirka div 33) - 8)) then
               begin
                 SetLength(Steny[high(Steny)], Length(Steny[high(Steny)]) + 1);
-                Steny[high(Steny)][high(Steny[high(Steny)])] := TStena.Create(high(Steny[high(Steny)]) * 33 + 17 + 2 * 33, high(Steny) * 33 + 17 + 2 * 33, t);
+                Steny[high(Steny)][high(Steny[high(Steny)])] :=
+                  TStena.Create(high(Steny[high(Steny)]) * 33 + 17 + 2 * 33, high(Steny) *
+                  33 + 17 + 2 * 33, t);
                 case t of
                   0: ZmenFarbu(high(Steny), high(Steny[high(Steny)]), clWhite);
                   1: ZmenFarbu(high(Steny), high(Steny[high(Steny)]), clRed);
@@ -136,33 +138,33 @@ end;
 
 procedure TSteny.PriradObraz;
 var
-  i,j : integer;
+  i, j: integer;
 begin
-for i:=0 to length(Steny)-1 do
-    for j:=0 to length(Steny[i])-1 do
+  for i := 0 to length(Steny) - 1 do
+    for j := 0 to length(Steny[i]) - 1 do
     begin
       if ((Steny[i][j].Typ < 2) or (Steny[i][j].Typ = 4)) then
-         Steny[i][j].Obraz := StenyObr[Steny[i][j].Typ];
+        Steny[i][j].Obraz := StenyObr[Steny[i][j].Typ];
     end;
 end;
 
 constructor TSteny.Create;
 var
-  Obrazok : TBitMap;
+  Obrazok: TBitMap;
   i, j: integer;
 begin
   SetLength(Steny, 0);
   Obrazok := TBitmap.Create;
   Obrazok.LoadFromFile('img/steny.bmp');
-  for i := 0 to length(StenyObr)-1 do
+  for i := 0 to length(StenyObr) - 1 do
   begin
-      StenyObr[i] := TBitmap.Create;
-      StenyObr[i].Width := 33;
-      StenyObr[i].Height := 33;
-      StenyObr[i].Transparent := True;
-      StenyObr[i].TransparentColor:= clFuchsia;
-      StenyObr[i].PixelFormat := pf24bit;
-      StenyObr[i].Canvas.Draw(-i*33, -0, Obrazok);
+    StenyObr[i] := TBitmap.Create;
+    StenyObr[i].Width := 33;
+    StenyObr[i].Height := 33;
+    StenyObr[i].Transparent := True;
+    StenyObr[i].TransparentColor := clFuchsia;
+    StenyObr[i].PixelFormat := pf24bit;
+    StenyObr[i].Canvas.Draw(-i * 33, -0, Obrazok);
   end;
   Obrazok.LoadFromFile('img/bomba.bmp');
   for i := 0 to 4 do
@@ -174,7 +176,7 @@ begin
       BombyObr[i][j].Transparent := True;
       BombyObr[i][j].TransparentColor := clFuchsia;
       BombyObr[i][j].PixelFormat := pf24bit;
-      BombyObr[i][j].Canvas.Draw(-j * 33, (-i-1) * 33, Obrazok);
+      BombyObr[i][j].Canvas.Draw(-j * 33, (-i - 1) * 33, Obrazok);
     end;
   Obrazok.Free;
 end;
