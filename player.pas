@@ -28,7 +28,8 @@ type
     Farba: TColor;
     PohybujeSa: boolean;
     Bomby: array of TBomba;
-    BombyObr: array[0..1] of TBitMap;
+    BombyObr: array[0..3] of TBitMap;
+    HracObr: array[0..3] of array[0..2] of TBitMap;
     procedure Posun(klaves: integer);
     procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel;
       Cas: TTimer);
@@ -79,20 +80,30 @@ begin
     Walle.Steny[PosY][PosX].Faza := 500;
     Result := True;
     case Smer of
-      0: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4];
-      1: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4];
-      2: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
-      3: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
+      0:
+      begin
+        Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4];
+        Walle.Steny[PosY][PosX].BombaSmer := 4;
+      end;
+      1:
+      begin
+        Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4];
+        Walle.Steny[PosY][PosX].BombaSmer := 4;
+      end;
+      2:
+      begin
+        Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
+        Walle.Steny[PosY][PosX].BombaSmer := 1;
+      end;
+      3:
+      begin
+        Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
+        Walle.Steny[PosY][PosX].BombaSmer := 1;
+      end;
     end;
   end
   else if (Walle.Steny[PosY][PosX].Typ = 3) then
   begin
-    case Smer of
-      0: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4]; // rozhodnut ktore lepsie
-      1: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][4];
-      2: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
-      3: Walle.Steny[PosY][PosX].Obraz := Walle.BombyObr[0][1];
-    end;
     Walle.Steny[PosY][PosX].Faza := 500;
     Result := True;
   end;
@@ -124,9 +135,7 @@ begin
     Y := SpawnY;
     Zivot := Zivot - 1;
   end;
-  Obr.Brush.Color := Farba;
-  Obr.Pen.Color := Farba;
-  Obr.Rectangle(X - 17, Y - 17, X + 16, Y + 16);
+  Obr.Draw(X - 17, Y - 17, HracObr[1][0]);
 end;
 
 procedure TPlayer.VykresliBombu(Obr: TCanvas; Walli: TSteny);
@@ -148,7 +157,10 @@ begin
         if (Bomby[j].OverStenu(Walli, Bomby[j].y div 33 - 2, i - 2, 2)) then
         begin
           if (i = (Bomby[j].x div 33 - Bomby[j].radius)) then
+          begin
             Walli.Steny[Bomby[j].y div 33 - 2][i - 2].Obraz := Walli.BombyObr[0][0];
+            Walli.Steny[Bomby[j].y div 33 - 2][i - 2].BombaSmer := 0;
+          end;
         end
         else
         begin
@@ -160,7 +172,10 @@ begin
         if (Bomby[j].OverStenu(Walli, Bomby[j].y div 33 - 2, i - 2, 3)) then
         begin
           if (i = (Bomby[j].x div 33 + Bomby[j].radius)) then
+          begin
             Walli.Steny[Bomby[j].y div 33 - 2][i - 2].Obraz := Walli.BombyObr[0][3];
+            Walli.Steny[Bomby[j].y div 33 - 2][i - 2].BombaSmer := 3;
+          end;
         end
         else
         begin
@@ -172,7 +187,10 @@ begin
         if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div 33 - 2, 1)) then
         begin
           if (i = (Bomby[j].y div 33 + Bomby[j].radius)) then
+          begin
             Walli.Steny[i - 2][Bomby[j].x div 33 - 2].Obraz := Walli.BombyObr[0][6];
+            Walli.Steny[i - 2][Bomby[j].x div 33 - 2].BombaSmer := 6;
+          end;
         end
         else
         begin
@@ -185,7 +203,10 @@ begin
         if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div 33 - 2, 0)) then
         begin
           if (i = (Bomby[j].y div 33 - Bomby[j].radius)) then
+          begin
             Walli.Steny[i - 2][Bomby[j].x div 33 - 2].Obraz := Walli.BombyObr[0][5];
+            Walli.Steny[i - 2][Bomby[j].x div 33 - 2].BombaSmer := 5;
+          end;
         end
         else
         begin
@@ -194,6 +215,7 @@ begin
       end;
       Walli.Steny[Bomby[j].y div 33 - 2][Bomby[j].x div 33 - 2].Obraz :=
         Walli.BombyObr[0][2];
+      Walli.Steny[Bomby[j].y div 33 - 2][Bomby[j].x div 33 - 2].BombaSmer := 2;
     end;
   end;
   ZmazBomby;
@@ -282,7 +304,7 @@ end;
 constructor TPlayer.Create(XX, YY: integer);
 var
   Obrazok: TBitMap;
-  i: integer;
+  i, j: integer;
 begin
   Zivot := 3;
   X := XX;
@@ -305,6 +327,18 @@ begin
     BombyObr[i].PixelFormat := pf24bit;
     BombyObr[i].Canvas.Draw(-i * 33, -0, Obrazok);
   end;
+  Obrazok.LoadFromFile('img/player.bmp');
+  for j := 0 to 3 do
+    for i := 0 to 1 do
+    begin
+      HracObr[j][i] := TBitmap.Create;
+      HracObr[j][i].Width := 33;
+      HracObr[j][i].Height := 33;
+      HracObr[j][i].Transparent := True;
+      HracObr[j][i].TransparentColor := Obrazok.Canvas.Pixels[0,0];
+      HracObr[j][i].PixelFormat := pf24bit;
+      HracObr[j][i].Canvas.Draw(-i * 33, -j * 33, Obrazok);
+    end;
   Obrazok.Free;
 end;
 

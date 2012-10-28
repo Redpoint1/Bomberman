@@ -9,7 +9,7 @@
         <Filename Value="bomberman.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="bomberman"/>
-        <UsageCount Value="71"/>
+        <UsageCount Value="74"/>
       </Unit0>
       <Unit1>
         <Filename Value="zaklad.pas"/>
@@ -18,12 +18,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="zaklad"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="76"/>
-        <CursorPos X="46" Y="96"/>
-        <UsageCount Value="71"/>
+        <TopLine Value="81"/>
+        <CursorPos X="31" Y="90"/>
+        <UsageCount Value="74"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -31,11 +30,12 @@
         <Filename Value="player.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="player"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="196"/>
-        <CursorPos X="30" Y="196"/>
-        <UsageCount Value="70"/>
+        <TopLine Value="124"/>
+        <CursorPos X="26" Y="138"/>
+        <UsageCount Value="73"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -44,9 +44,9 @@
         <UnitName Value="game"/>
         <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="146"/>
-        <CursorPos X="48" Y="176"/>
-        <UsageCount Value="69"/>
+        <TopLine Value="34"/>
+        <CursorPos X="75" Y="51"/>
+        <UsageCount Value="72"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
@@ -55,9 +55,9 @@
         <UnitName Value="npc"/>
         <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="41"/>
-        <CursorPos X="15" Y="69"/>
-        <UsageCount Value="45"/>
+        <TopLine Value="1"/>
+        <CursorPos X="76" Y="94"/>
+        <UsageCount Value="48"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
@@ -140,123 +140,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="player.pas"/>
-        <Caret Line="172" Column="93" TopLine="162"/>
+        <Caret Line="82" Column="57" TopLine="68"/>
       </Position1>
       <Position2>
         <Filename Value="player.pas"/>
-        <Caret Line="31" Column="13" TopLine="189"/>
+        <Caret Line="83" Column="57" TopLine="68"/>
       </Position2>
       <Position3>
         <Filename Value="player.pas"/>
-        <Caret Line="81" Column="57" TopLine="68"/>
+        <Caret Line="84" Column="57" TopLine="68"/>
       </Position3>
       <Position4>
         <Filename Value="player.pas"/>
-        <Caret Line="82" Column="57" TopLine="68"/>
+        <Caret Line="131" Column="58" TopLine="108"/>
       </Position4>
       <Position5>
         <Filename Value="player.pas"/>
-        <Caret Line="83" Column="57" TopLine="68"/>
+        <Caret Line="141" Column="76" TopLine="118"/>
       </Position5>
       <Position6>
         <Filename Value="player.pas"/>
-        <Caret Line="84" Column="57" TopLine="68"/>
+        <Caret Line="150" Column="76" TopLine="128"/>
       </Position6>
       <Position7>
         <Filename Value="player.pas"/>
-        <Caret Line="131" Column="58" TopLine="108"/>
+        <Caret Line="159" Column="76" TopLine="137"/>
       </Position7>
       <Position8>
         <Filename Value="player.pas"/>
-        <Caret Line="141" Column="76" TopLine="118"/>
+        <Caret Line="168" Column="76" TopLine="146"/>
       </Position8>
       <Position9>
         <Filename Value="player.pas"/>
-        <Caret Line="150" Column="76" TopLine="128"/>
+        <Caret Line="172" Column="88" TopLine="150"/>
       </Position9>
       <Position10>
         <Filename Value="player.pas"/>
-        <Caret Line="159" Column="76" TopLine="137"/>
+        <Caret Line="276" Column="13" TopLine="253"/>
       </Position10>
       <Position11>
         <Filename Value="player.pas"/>
-        <Caret Line="168" Column="76" TopLine="146"/>
+        <Caret Line="277" Column="13" TopLine="254"/>
       </Position11>
       <Position12>
         <Filename Value="player.pas"/>
-        <Caret Line="172" Column="88" TopLine="150"/>
+        <Caret Line="278" Column="13" TopLine="255"/>
       </Position12>
       <Position13>
         <Filename Value="player.pas"/>
-        <Caret Line="276" Column="13" TopLine="253"/>
+        <Caret Line="279" Column="13" TopLine="256"/>
       </Position13>
       <Position14>
         <Filename Value="player.pas"/>
-        <Caret Line="277" Column="13" TopLine="254"/>
+        <Caret Line="280" Column="13" TopLine="257"/>
       </Position14>
       <Position15>
         <Filename Value="player.pas"/>
-        <Caret Line="278" Column="13" TopLine="255"/>
+        <Caret Line="281" Column="13" TopLine="258"/>
       </Position15>
       <Position16>
         <Filename Value="player.pas"/>
-        <Caret Line="279" Column="13" TopLine="256"/>
+        <Caret Line="8" Column="6" TopLine="1"/>
       </Position16>
       <Position17>
         <Filename Value="player.pas"/>
-        <Caret Line="280" Column="13" TopLine="257"/>
+        <Caret Line="31" Column="13" TopLine="8"/>
       </Position17>
       <Position18>
         <Filename Value="player.pas"/>
-        <Caret Line="281" Column="13" TopLine="258"/>
+        <Caret Line="81" Column="57" TopLine="58"/>
       </Position18>
       <Position19>
         <Filename Value="player.pas"/>
-        <Caret Line="8" Column="6" TopLine="1"/>
+        <Caret Line="82" Column="57" TopLine="59"/>
       </Position19>
       <Position20>
         <Filename Value="player.pas"/>
-        <Caret Line="31" Column="13" TopLine="8"/>
+        <Caret Line="83" Column="57" TopLine="60"/>
       </Position20>
       <Position21>
         <Filename Value="player.pas"/>
-        <Caret Line="81" Column="57" TopLine="58"/>
+        <Caret Line="84" Column="57" TopLine="61"/>
       </Position21>
       <Position22>
         <Filename Value="player.pas"/>
-        <Caret Line="82" Column="57" TopLine="59"/>
+        <Caret Line="18" Column="20" TopLine="8"/>
       </Position22>
       <Position23>
         <Filename Value="player.pas"/>
-        <Caret Line="83" Column="57" TopLine="60"/>
+        <Caret Line="31" Column="37" TopLine="17"/>
       </Position23>
       <Position24>
-        <Filename Value="player.pas"/>
-        <Caret Line="84" Column="57" TopLine="61"/>
+        <Filename Value="game.pas"/>
+        <Caret Line="166" Column="17" TopLine="49"/>
       </Position24>
       <Position25>
-        <Filename Value="player.pas"/>
-        <Caret Line="18" Column="20" TopLine="8"/>
+        <Filename Value="game.pas"/>
+        <Caret Line="167" Column="18" TopLine="162"/>
       </Position25>
       <Position26>
         <Filename Value="player.pas"/>
-        <Caret Line="31" Column="37" TopLine="17"/>
+        <Caret Line="84" Column="62" TopLine="65"/>
       </Position26>
       <Position27>
-        <Filename Value="game.pas"/>
-        <Caret Line="166" Column="17" TopLine="49"/>
+        <Filename Value="player.pas"/>
+        <Caret Line="178" Column="84" TopLine="160"/>
       </Position27>
       <Position28>
-        <Filename Value="game.pas"/>
-        <Caret Line="167" Column="18" TopLine="162"/>
+        <Filename Value="npc.pas"/>
+        <Caret Line="94" Column="61" TopLine="77"/>
       </Position28>
       <Position29>
         <Filename Value="player.pas"/>
-        <Caret Line="84" Column="62" TopLine="65"/>
+        <Caret Line="334" Column="21" TopLine="319"/>
       </Position29>
       <Position30>
         <Filename Value="player.pas"/>
-        <Caret Line="178" Column="84" TopLine="160"/>
+        <Caret Line="138" Column="11" TopLine="124"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

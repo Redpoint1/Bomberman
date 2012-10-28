@@ -22,6 +22,7 @@ type
 
   TNepriatel = class
     NPC: array of TNpc;
+    NpcObr : array[0..0] of array[0..1] of TBitMap;
     procedure Pridaj(XX, YY, Typ: integer);
     procedure vymazNilNpc;
     constructor Create();
@@ -60,8 +61,25 @@ begin
 end;
 
 constructor TNepriatel.Create;
+var
+  Obrazok : TBitMap;
+  i, j: integer;
 begin
   setLength(NPC, 0);
+  Obrazok := TBitmap.Create;
+  Obrazok.LoadFromFile('img/npc.bmp');
+  for i := 0 to 0 do
+    for j := 0 to 1 do
+    begin
+      NpcObr[i][j] := TBitmap.Create;
+      NpcObr[i][j].Width := 33;
+      NpcObr[i][j].Height := 33;
+      NpcObr[i][j].Transparent := True;
+      NpcObr[i][j].TransparentColor := Obrazok.Canvas.Pixels[0,0];
+      NpcObr[i][j].PixelFormat := pf24bit;
+      NpcObr[i][j].Canvas.Draw(-j * 33, -i * 33, Obrazok);
+    end;
+  Obrazok.Free;
 end;
 
 procedure TNepriatel.Vykresli(Obr: TCanvas; Okolie: TSteny);
@@ -73,9 +91,7 @@ begin
   for i := 0 to length(NPC) - 1 do
   begin
     PohybujSa(NPC[i], Okolie);
-    Obr.Brush.Color := NPC[i].Farba;
-    Obr.Pen.Color := NPC[i].Farba;
-    Obr.Rectangle(NPC[i].X - 17, NPC[i].Y - 17, NPC[i].X + 16, NPC[i].Y + 16);
+    Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][NPC[i].Faza div 50]);
   end;
 end;
 
@@ -120,6 +136,9 @@ begin
     end
     else
       Kto.PohybujeSa := False;
+  if (Kto.faza = 0) then
+     Kto.Faza := 100;
+  Dec(Kto.Faza, 1);
 end;
 
 procedure TNepriatel.VyberSmer(Komu: TNpc);
@@ -236,6 +255,7 @@ begin
   Typ := TypNPC;
   Smer := 0;
   PohybujeSa := False;
+  Faza := 100;
   Farba := clLime;
   Sekunda := 1000;
 end;
