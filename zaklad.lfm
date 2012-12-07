@@ -1,13 +1,13 @@
 object Form1: TForm1
-  Left = 446
+  Left = 373
   Height = 660
-  Top = 158
+  Top = 129
   Width = 990
   AlphaBlendValue = 250
   Caption = 'Form1'
   ClientHeight = 660
   ClientWidth = 990
-  Color = clFuchsia
+  Color = clGray
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   LCLVersion = '1.0.2.0'

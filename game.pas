@@ -11,45 +11,38 @@ type
 
   { TStena }
 
-  TStena = class
+  TStena = class //trieda policka mapy
     X, Y, Typ, Faza, BombaSmer: integer;
-    Obraz: TBitmap;
-    Farba: TColor;
+    //pozicia policka, typ policka, smer vybuchu a faza vybuchu
+    Obraz: TBitmap; //obrazok policka
     constructor Create(XX, YY, TypSteny: integer);
   end;
 
   { TSteny }
 
-  TSteny = class
-    Steny: array of array of TStena;
-    StenyObr: array[0..4] of TBitMap;
-    BombyObr: array[0..4] of array[0..6] of TBitMap;
-    procedure ZmenFarbu(X, Y: integer; Farby: TColor);
-    procedure Vykresli(Obr: TCanvas);
-    procedure ZmenFazu;
-    procedure VykresliFazu;
-    procedure Nacitaj(Subor: string; Vyska, Sirka: integer);
-    procedure PriradObraz;
+  TSteny = class   //trieda celej mapy
+    Steny: array of array of TStena;  //mapa z policok v poli
+    StenyObr: array[0..4] of TBitMap; //obrazky roznych stien
+    BombyObr: array[0..4] of array[0..6] of TBitMap; //obrazky a fazy vybuchov bomby
+    procedure Vykresli(Obr: TCanvas); //vykreslenie celej mapy na obrazok
+    procedure ZmenFazu;  //zmena fazy vybuchu
+    procedure VykresliFazu; //vykreslenie vybuchu (samostatne od mapy)
+    procedure Nacitaj(Subor: string; Vyska, Sirka: integer); //nacitanie mapy zo suboru
+    procedure PriradObraz; //po nacitani zo subor prirad obrazok podla typu policka
     constructor Create();
   end;
 
 implementation
 
 { TSteny }
-
-procedure TSteny.ZmenFarbu(X, Y: integer; Farby: TColor);
-begin
-  Steny[X][Y].Farba := Farby;
-end;
-
 procedure TSteny.Vykresli(Obr: TCanvas);
 var
   i, j: integer;
 begin
-  for i := 0 to length(Steny) - 1 do
+  for i := 0 to length(Steny) - 1 do   //vykresli vsetky policka
     for j := 0 to length(Steny[i]) - 1 do
       Obr.Draw(Steny[i][j].X - 17, Steny[i][j].Y - 17, Steny[i][j].Obraz);
-  VykresliFazu;
+  VykresliFazu;  //vykresli vybuch
 end;
 
 procedure TSteny.ZmenFazu;
@@ -57,15 +50,18 @@ var
   xokolie, yokolie: integer;
 begin
   for yokolie := 0 to length(Steny) - 1 do
-    for xokolie := 0 to length(Steny[yokolie]) - 1 do
+    for xokolie := 0 to length(Steny[yokolie]) - 1 do //cez vsetky policka
       if ((Steny[yokolie][xokolie].Typ = 3) and (Steny[yokolie][xokolie].Faza = 0)) then
+        //ak je koniec vybuchu
       begin
-        Steny[yokolie][xokolie].Typ := 0;
-        Steny[yokolie][xokolie].Obraz := StenyObr[0];
+        Steny[yokolie][xokolie].Typ := 0;  //nastav typ policka na povodny
+        Steny[yokolie][xokolie].Obraz := StenyObr[0];  //aj obrazok
         Steny[yokolie][xokolie].BombaSmer := 0;
         Steny[yokolie][xokolie].Faza := Steny[yokolie][xokolie].Faza - 1;
+        //hod fazu policka na -1 aby sa neanimovalo (kedze uz vybuch skoncil)
       end
       else if (Steny[yokolie][xokolie].Faza > 0) then
+        //ak este trva vybuch odpocitavaj cas ukoncenia (co je faza)
       begin
         Steny[yokolie][xokolie].Faza := Steny[yokolie][xokolie].Faza - 10;
       end;
@@ -77,11 +73,12 @@ var
 begin
   ZmenFazu;
   for i := 0 to length(Steny) - 1 do
-    for j := 0 to length(Steny[i]) - 1 do
+    for j := 0 to length(Steny[i]) - 1 do  //cez vsetky policka
     begin
-      if (Steny[i][j].Typ = 3) then
+      if (Steny[i][j].Typ = 3) then //ked sa v policku vybuchuje
       begin
         case (Steny[i][j].Faza div 100) of
+          //prirad dotycny obrazok vybuchu podla smeru a fazy
           4: Steny[i][j].Obraz := BombyObr[0][Steny[i][j].BombaSmer];
           3: Steny[i][j].Obraz := BombyObr[1][Steny[i][j].BombaSmer];
           2: Steny[i][j].Obraz := BombyObr[2][Steny[i][j].BombaSmer];
@@ -97,43 +94,41 @@ var
   t, x, y: integer;
   Sub: TextFile;
 begin
-  if fileexists(Subor + '.txt') then
+  if fileexists(Subor + '.txt') then  //overenie ci existuje vobec ten subor
   begin
     AssignFile(Sub, Subor + '.txt');
     Reset(Sub);
     Read(Sub, Y);
-    Readln(Sub, X);
+    Readln(Sub, X);   //definovanie a otvorenie suboru
     Readln(Sub);
-    repeat
+    repeat    //nacvita policka podla velkosti a vysky mapy ,ktore su definovane v subore (riadku)
       begin
         if (Length(Steny) <= ((Vyska div 33) - 5)) then
+          //osetrenie aby nenacitalo viacej od velkosti mapy
         begin
           SetLength(Steny, Length(Steny) + 1);
-          repeat
+          repeat  //nacitavanie stplce
             begin
               Read(Sub, t);
               if (Length(Steny[high(Steny)]) <= ((Sirka div 33) - 8)) then
+                //osetrenie aby nenacitalo viacej policok od toho kolko je definovanych
               begin
                 SetLength(Steny[high(Steny)], Length(Steny[high(Steny)]) + 1);
+                //zvysenie pola policok mapy
                 Steny[high(Steny)][high(Steny[high(Steny)])] :=
-                  TStena.Create(high(Steny[high(Steny)]) * 33 + 17 + 2 * 33, high(Steny) *
-                  33 + 17 + 2 * 33, t);
-                case t of
-                  0: ZmenFarbu(high(Steny), high(Steny[high(Steny)]), clWhite);
-                  1: ZmenFarbu(high(Steny), high(Steny[high(Steny)]), clRed);
-                  2: ZmenFarbu(high(Steny), high(Steny[high(Steny)]), clBlue);
-                  4: ZmenFarbu(high(Steny), high(Steny[high(Steny)]), clGreen);
-                end;
+                  TStena.Create(high(Steny[high(Steny)]) * 33 + 17 +
+                  2 * 33, high(Steny) * 33 + 17 + 2 * 33, t);   //vytvorenie s poziciami
               end;
             end;
           until Length(Steny[high(Steny)]) = X;
+          //pokial bolo definovane v subore nacita stplce
         end;
         readln(Sub);
       end;
-    until Length(Steny) = Y;
-    CloseFile(Sub);
+    until Length(Steny) = Y; //nacita riadky pokial bolo definovane v subore
+    CloseFile(Sub); //zatvori subor
   end;
-  PriradObraz;
+  PriradObraz; //prirady obrazy podla nacitanych typov policok mapy
 end;
 
 procedure TSteny.PriradObraz;
@@ -141,9 +136,10 @@ var
   i, j: integer;
 begin
   for i := 0 to length(Steny) - 1 do
-    for j := 0 to length(Steny[i]) - 1 do
+    for j := 0 to length(Steny[i]) - 1 do //pre vsetky policka
     begin
       if ((Steny[i][j].Typ < 2) or (Steny[i][j].Typ = 4)) then
+        //pokial typ steny nie je vybuch priradi obrazok
         Steny[i][j].Obraz := StenyObr[Steny[i][j].Typ];
     end;
 end;
@@ -155,7 +151,7 @@ var
 begin
   SetLength(Steny, 0);
   Obrazok := TBitmap.Create;
-  Obrazok.LoadFromFile('img/steny.bmp');
+  Obrazok.LoadFromFile('img/steny.bmp'); //nacitanie typ stien z obrazku
   for i := 0 to length(StenyObr) - 1 do
   begin
     StenyObr[i] := TBitmap.Create;
@@ -166,9 +162,9 @@ begin
     StenyObr[i].PixelFormat := pf24bit;
     StenyObr[i].Canvas.Draw(-i * 33, -0, Obrazok);
   end;
-  Obrazok.LoadFromFile('img/bomba.bmp');
+  Obrazok.LoadFromFile('img/bomba.bmp'); //nacitanie vybuchov
   for i := 0 to 4 do
-    for j := 0 to 6 do
+    for j := 0 to 6 do  //vsetky smery a fazy
     begin
       BombyObr[i][j] := TBitmap.Create;
       BombyObr[i][j].Width := 33;
@@ -184,6 +180,7 @@ end;
 { TStena }
 
 constructor TStena.Create(XX, YY, TypSteny: integer);
+  //definovanie premennych objektu pri vytvoreni
 begin
   X := XX;
   Y := YY;
