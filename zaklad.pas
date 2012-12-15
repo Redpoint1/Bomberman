@@ -18,6 +18,7 @@ type
     Timer2: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
+    procedure FormKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
   private
@@ -74,7 +75,7 @@ begin
       //nastavime kosticku mapy ,ze je tam polozena bomba
     end;
   end;
-  if not (Hrac.PohybujeSa) then //ak sa nepohybuje hrac
+  if (not (Hrac.PohybujeSa) and (Key <> VK_SPACE)) then //ak sa nepohybuje hrac
   begin
     case Key of
       VK_UP: Hrac.Smer := 0; //smer hraca ktorym pojde
@@ -82,7 +83,7 @@ begin
       VK_LEFT: Hrac.Smer := 2;
       VK_RIGHT: Hrac.Smer := 3;
     end;
-    if (Hrac.OverPosun(Wall) and (Key <> VK_SPACE)) then
+    if (Hrac.OverPosun(Wall)) then
       //overi posun hraca ci moze ist na danu kosticku ak je stlaceny jeden z klaves s ktorymi sa pohybuje
     begin
       Hrac.Faza := 33; //resetovanie fazy animovania
@@ -91,6 +92,15 @@ begin
       Timer2.Enabled := True;
       //povolime casovac ,ktory bude animovat pohyb hraca aj zmenami x,y
     end;
+  end;
+end;
+
+procedure TForm1.FormKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
+begin
+  if ((Hrac.PohybujeSa) and (Key <> VK_SPACE)) then
+  begin
+    Timer2.Enabled := False;
+    Hrac.PohybujeSa := False;
   end;
 end;
 
@@ -110,12 +120,12 @@ end;
 
 procedure TForm1.Timer2Timer(Sender: TObject);
 begin
-  Hrac.Posun(Hrac.Smer); //meni poziciu hraca podla orientacie pohybu
-  if (((Hrac.X mod pixel) = 17) and ((Hrac.Y mod pixel) = 17)) then
-    //ak dosiahne stred dalsej kosticky
+  if Hrac.OverPosun(Wall) then
+    Hrac.Posun(Hrac.Smer) //meni poziciu hraca podla orientacie pohybu
+  else
   begin
-    Hrac.PohybujeSa := False;  //skonci pohyb
     Timer2.Enabled := False;
+    Hrac.PohybujeSa := False;
   end;
 end;
 

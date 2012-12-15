@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 373
+  Left = 361
   Height = 660
-  Top = 129
+  Top = 89
   Width = 990
   AlphaBlendValue = 250
   Caption = 'Form1'
@@ -10,7 +10,8 @@ object Form1: TForm1
   Color = clGray
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
-  LCLVersion = '1.0.2.0'
+  OnKeyUp = FormKeyUp
+  LCLVersion = '1.0.4.0'
   object Image1: TImage
     Left = 0
     Height = 660

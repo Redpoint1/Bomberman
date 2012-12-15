@@ -46,6 +46,9 @@ type
     constructor Create(XX, YY: integer);  //vytvorenie hraca
   end;
 
+const
+  PovoleneBloky = [0, 2];
+
 
 implementation
 
@@ -148,9 +151,9 @@ begin
   end;
   if (PohybujeSa) then  //ak sa pohybuje
   begin
-    if (Faza <= 0) then //opacne kreslenie obrazkov pohybu (zacyklovanie animacie pohybu)
+    if (Faza = 1) then //opacne kreslenie obrazkov pohybu (zacyklovanie animacie pohybu)
       opacne := True;
-    if (Faza >= 33) then
+    if (Faza = 32) then
       opacne := False;
     if (Opacne) then
       Inc(Faza)
@@ -296,32 +299,43 @@ begin
   case Smer of //overenie podla orientacie pohybu hraca
     0:
     begin
-      if ((Y div 33 - 1 - 2) < 0) then //ak je koniec mapy
+      if ((Y - 2) < 66) then //ak je koniec mapy
         exit;
-      if (Okolie.Steny[Y div 33 - 1 - 2][X div 33 - 2].Typ = 0) then
-        //ak sa moze posunut
+      if ((Okolie.Steny[(Y - 2) div 33 - 2][(X - 10) div 33 - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y - 2) div 33 - 2][(X + 7) div 33 - 2].Typ in
+        PovoleneBloky)) then //ak sa moze posunut
         Result := True;
     end;
     //opakovanie pre vsetky smery
     1:
     begin
-      if ((Y div 33 + 1 - 2) > Length(Okolie.Steny) - 1) then
+      if (((Y + 16) div 33 - 2) > Length(Okolie.Steny) - 1) then
         exit;
-      if (Okolie.Steny[Y div 33 + 1 - 2][X div 33 - 2].Typ = 0) then
+      if (Okolie.Steny[(Y + 12) div 33 - 2][(X - 10) div 33 - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y + 8) div 33 - 2][(X + 7) div 33 - 2].Typ in
+        PovoleneBloky) then
         Result := True;
     end;
     2:
     begin
-      if ((X div 33 - 1 - 2) < 0) then
+      if ((X - 11) < 66) then
         exit;
-      if (Okolie.Steny[Y div 33 - 2][X div 33 - 1 - 2].Typ = 0) then
+      if ((Okolie.Steny[(Y - 1) div 33 - 2][(X - 10) div 33 - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y - 1) div 33 - 2][(X + 10) div 33 - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y + 11) div 33 - 2][(X - 10) div 33 - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y + 11) div 33 - 2][(X + 10) div 33 - 2].Typ in
+        PovoleneBloky)) then
         Result := True;
     end;
     3:
     begin
-      if ((X div 33 + 1 - 2) > Length(Okolie.Steny[Y div 33 - 2]) - 1) then
+      if (((X + 11) div 33 - 2) > Length(Okolie.Steny[Y div 33 - 2]) - 1) then
         exit;
-      if (Okolie.Steny[Y div 33 - 2][X div 33 + 1 - 2].Typ = 0) then
+      if ((Okolie.Steny[(Y - 1) div 33 - 2][(X - 10) div 33 - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y - 1) div 33 - 2][(X + 10) div 33 - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y + 11) div 33 - 2][(X - 10) div 33 - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y + 11) div 33 - 2][(X + 10) div 33 - 2].Typ in
+        PovoleneBloky)) then
         Result := True;
     end;
   end;
