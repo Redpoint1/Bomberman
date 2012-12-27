@@ -5,7 +5,7 @@ unit game;
 interface
 
 uses
-  Classes, SysUtils, Graphics;
+  Classes, SysUtils, Graphics, LCLType;
 
 type
 
@@ -14,7 +14,7 @@ type
   TStena = class //trieda policka mapy
     X, Y, Typ, Faza, BombaSmer: integer;
     //pozicia policka, typ policka, smer vybuchu a faza vybuchu
-    Obraz: TBitmap; //obrazok policka
+    Obraz: TBitMap; //obrazok policka
     constructor Create(XX, YY, TypSteny: integer);
   end;
 
@@ -31,6 +31,11 @@ type
     procedure PriradObraz; //po nacitani zo subor prirad obrazok podla typu policka
     constructor Create();
   end;
+
+const
+  pixel: integer = 33;
+  PovoleneBloky = [0, 2];
+  KlavesnicePohybu = [VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT];
 
 implementation
 
@@ -103,21 +108,22 @@ begin
     Readln(Sub);
     repeat    //nacvita policka podla velkosti a vysky mapy ,ktore su definovane v subore (riadku)
       begin
-        if (Length(Steny) <= ((Vyska div 33) - 5)) then
+        if (Length(Steny) <= ((Vyska div pixel) - 5)) then
           //osetrenie aby nenacitalo viacej od velkosti mapy
         begin
           SetLength(Steny, Length(Steny) + 1);
           repeat  //nacitavanie stplce
             begin
               Read(Sub, t);
-              if (Length(Steny[high(Steny)]) <= ((Sirka div 33) - 8)) then
+              if (Length(Steny[high(Steny)]) <= ((Sirka div pixel) - 8)) then
                 //osetrenie aby nenacitalo viacej policok od toho kolko je definovanych
               begin
                 SetLength(Steny[high(Steny)], Length(Steny[high(Steny)]) + 1);
                 //zvysenie pola policok mapy
                 Steny[high(Steny)][high(Steny[high(Steny)])] :=
-                  TStena.Create(high(Steny[high(Steny)]) * 33 + 17 +
-                  2 * 33, high(Steny) * 33 + 17 + 2 * 33, t);   //vytvorenie s poziciami
+                  TStena.Create(high(Steny[high(Steny)]) * pixel +
+                  17 + 2 * pixel, high(Steny) * pixel + 17 + 2 * pixel, t);
+                //vytvorenie s poziciami
               end;
             end;
           until Length(Steny[high(Steny)]) = X;
@@ -150,29 +156,25 @@ var
   i, j: integer;
 begin
   SetLength(Steny, 0);
-  Obrazok := TBitmap.Create;
+  Obrazok := TBitMap.Create;
   Obrazok.LoadFromFile('img/steny.bmp'); //nacitanie typ stien z obrazku
   for i := 0 to length(StenyObr) - 1 do
   begin
-    StenyObr[i] := TBitmap.Create;
-    StenyObr[i].Width := 33;
-    StenyObr[i].Height := 33;
-    StenyObr[i].Transparent := True;
-    StenyObr[i].TransparentColor := clFuchsia;
+    StenyObr[i] := TBitMap.Create;
+    StenyObr[i].Width := pixel;
+    StenyObr[i].Height := pixel;
     StenyObr[i].PixelFormat := pf24bit;
-    StenyObr[i].Canvas.Draw(-i * 33, -0, Obrazok);
+    StenyObr[i].Canvas.Draw(-i * pixel, -0, Obrazok);
   end;
   Obrazok.LoadFromFile('img/bomba.bmp'); //nacitanie vybuchov
   for i := 0 to 4 do
     for j := 0 to 6 do  //vsetky smery a fazy
     begin
-      BombyObr[i][j] := TBitmap.Create;
-      BombyObr[i][j].Width := 33;
-      BombyObr[i][j].Height := 33;
-      BombyObr[i][j].Transparent := True;
-      BombyObr[i][j].TransparentColor := clFuchsia;
+      BombyObr[i][j] := TBitMap.Create;
+      BombyObr[i][j].Width := pixel;
+      BombyObr[i][j].Height := pixel;
       BombyObr[i][j].PixelFormat := pf24bit;
-      BombyObr[i][j].Canvas.Draw(-j * 33, (-i - 1) * 33, Obrazok);
+      BombyObr[i][j].Canvas.Draw(-j * pixel, (-i - 1) * pixel, Obrazok);
     end;
   Obrazok.Free;
 end;

@@ -14,7 +14,7 @@ type
   TNpc = class  //trieda nepriatelov
     X, Y, Smer, Faza, Typ, Sekunda: integer;
     //suradnice, orientacia pohybu, animacia, typ nepriatela, cas pohybu
-    PohybujeSa: boolean; //prave sa pohybuje
+    Zomrel, PohybujeSa: boolean; //prave sa pohybuje
     constructor Create(XX, YY, TypNPC: integer);
   end;
 
@@ -22,7 +22,7 @@ type
 
   TNepriatel = class  //trieda nepratelov (viacerych)
     NPC: array of TNpc; //pole objektov nepriatelov
-    NpcObr: array[0..0] of array[0..1] of TBitMap; //obrazky nepriatelov
+    NpcObr: array[0..0] of array[0..2] of TBitMap; //obrazky nepriatelov
     procedure Pridaj(XX, YY, Typ: integer); //pridanie dalsieho nepriatela
     procedure vymazNilNpc; //vymazanie z pola nepratelov ktori boli zniceni
     constructor Create();
@@ -54,13 +54,13 @@ var
 begin
   j := 0;    //zmazeme zaniknutych nepriatelov a skracujeme pole nepriatelov
   for i := 0 to length(NPC) - 1 do
-    if (NPC[i] = nil) then
+    if (NPC[i] <> nil) then
     begin
-      NPC[i] := NPC[high(NPC) - j];
-      //prehadzujeme zaniknutycha  hadzeme ich an koniec pola
+      NPC[j] := NPC[i];
       Inc(j);
+      //prehadzujeme zaniknutycha  hadzeme ich an koniec pola
     end;
-  SetLength(NPC, length(NPC) - j); //pole nepriatelov zmensujeme o pocet zaniknutych
+  SetLength(NPC, j); //pole nepriatelov zmensujeme o pocet zaniknutych
 end;
 
 constructor TNepriatel.Create;
@@ -69,18 +69,18 @@ var
   i, j: integer;
 begin
   setLength(NPC, 0);
-  Obrazok := TBitmap.Create;
+  Obrazok := TBitMap.Create;
   Obrazok.LoadFromFile('img/npc.bmp');  //nacitanie obrazkov nepriatelov aj s animaciami
   for i := 0 to 0 do
-    for j := 0 to 1 do
+    for j := 0 to 2 do
     begin
-      NpcObr[i][j] := TBitmap.Create;
-      NpcObr[i][j].Width := 33;
-      NpcObr[i][j].Height := 33;
+      NpcObr[i][j] := TBitMap.Create;
+      NpcObr[i][j].Width := pixel;
+      NpcObr[i][j].Height := pixel;
       NpcObr[i][j].Transparent := True;
       NpcObr[i][j].TransparentColor := Obrazok.Canvas.Pixels[0, 0];
       NpcObr[i][j].PixelFormat := pf24bit;
-      NpcObr[i][j].Canvas.Draw(-j * 33, -i * 33, Obrazok);
+      NpcObr[i][j].Canvas.Draw(-j * pixel, -i * pixel, Obrazok);
     end;
   Obrazok.Free;
 end;
@@ -93,10 +93,26 @@ begin
   VymazNilNpc;   //zmazeme ktorych zasiahol vybuch
   for i := 0 to length(NPC) - 1 do
   begin
-    PohybujSa(NPC[i], Okolie);
-    //zmena pozicie pri pohybovani ,alebo priradenie dalsieho pohybu na ine policko
-    Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][NPC[i].Faza div 50]);
-    //vykreslenie
+    if not (NPC[i].Zomrel) then
+    begin
+      PohybujSa(NPC[i], Okolie);
+      //zmena pozicie pri pohybovani ,alebo priradenie dalsieho pohybu na ine policko
+      Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][NPC[i].Faza div 50]);
+      //vykreslenie
+    end
+    else
+    begin
+      if (NPC[i].Sekunda <= 0) then
+      begin
+        FreeAndNil(NPC[i]);
+        VymazNilNpc;
+      end
+      else
+      begin
+        Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][2]);
+        Dec(NPC[i].Sekunda, 10);
+      end;
+    end;
   end;
 end;
 
@@ -106,15 +122,16 @@ var
 begin
   for i := 0 to length(NPC) - 1 do //pre vsetkych nepriatelov z pola
   begin
-    if (NPC[i].pohybujeSa) then //ak sa prave pohybuje
+    if ((NPC[i].pohybujeSa) and not (NPC[i].Zomrel)) then
+      //ak sa prave pohybuje a nezomrel
     begin
       Posun(NPC[i]); //zmenime poziciu
-      if (((NPC[i].X mod 33) = 17) and ((NPC[i].Y mod 33) = 17) and
+      if (((NPC[i].X mod pixel) = 17) and ((NPC[i].Y mod pixel) = 17) and
         (NPC[i].Smer <> 0)) then  //ak doslo do stredu noveho policka
       begin
         NPC[i].PohybujeSa := False;  //skonci pohyb
       end;
-      if (((NPC[i].X mod 33) = 17) and ((NPC[i].Y mod 33) = 17) and
+      if (((NPC[i].X mod pixel) = 17) and ((NPC[i].Y mod pixel) = 17) and
         (NPC[i].Smer = 0)) then  //ak je v strede policka
       begin
         if (NPC[i].Sekunda = 0) then //a uz skoncil pohyb
@@ -190,8 +207,12 @@ var
 begin
   for i := 0 to length(NPC) - 1 do
     //pre vsetkych nepriatelov overi ci nezabilo ich vybuch
-    if (Okolie.Steny[NPC[i].Y div 33 - 2][NPC[i].X div 33 - 2].Typ = 3) then
-      FreeAndNil(NPC[i]);   //ak ano tak znicime nepriatelov
+    if (Okolie.Steny[NPC[i].Y div pixel - 2][NPC[i].X div pixel - 2].Typ = 3) then
+    begin
+      NPC[i].Zomrel := True;
+      ;   //ak ano tak zomrel
+      NPC[i].Sekunda := 500;
+    end;
 end;
 
 procedure TNepriatel.Nacitaj(S: string);
@@ -225,32 +246,33 @@ begin
     0: Result := True; //ak stoji tak nema ziadnu barieru kam by nemohol ist
     1: //hore
     begin
-      if ((Komu.Y div 33 - 1 - 2) < 0) then   //ak by chcel ist za okraje mapy
+      if ((Komu.Y div pixel - 1 - 2) < 0) then   //ak by chcel ist za okraje mapy
         exit;
-      if (Okolie.Steny[Komu.Y div 33 - 1 - 2][Komu.X div 33 - 2].Typ = 0) then
+      if (Okolie.Steny[Komu.Y div pixel - 1 - 2][Komu.X div pixel - 2].Typ = 0) then
         //ak am volne policko kam moze ist
         Result := True;
     end;
     //opakuje sa
     2:  //dole
     begin
-      if ((Komu.Y div 33 + 1 - 2) > Length(Okolie.Steny) - 1) then
+      if ((Komu.Y div pixel + 1 - 2) > Length(Okolie.Steny) - 1) then
         exit;
-      if (Okolie.Steny[Komu.Y div 33 + 1 - 2][Komu.X div 33 - 2].Typ = 0) then
+      if (Okolie.Steny[Komu.Y div pixel + 1 - 2][Komu.X div pixel - 2].Typ = 0) then
         Result := True;
     end;
     3: //doprava
     begin
-      if ((Komu.X div 33 - 1 - 2) < 0) then
+      if ((Komu.X div pixel - 1 - 2) < 0) then
         exit;
-      if (Okolie.Steny[Komu.Y div 33 - 2][Komu.X div 33 - 1 - 2].Typ = 0) then
+      if (Okolie.Steny[Komu.Y div pixel - 2][Komu.X div pixel - 1 - 2].Typ = 0) then
         Result := True;
     end;
     4:  //dolava
     begin
-      if ((Komu.X div 33 + 1 - 2) > Length(Okolie.Steny[Komu.Y div 33 - 2]) - 1) then
+      if ((Komu.X div pixel + 1 - 2) >
+        Length(Okolie.Steny[Komu.Y div pixel - 2]) - 1) then
         exit;
-      if (Okolie.Steny[Komu.Y div 33 - 2][Komu.X div 33 + 1 - 2].Typ = 0) then
+      if (Okolie.Steny[Komu.Y div pixel - 2][Komu.X div pixel + 1 - 2].Typ = 0) then
         Result := True;
     end;
   end;
@@ -260,8 +282,9 @@ end;
 
 constructor TNpc.Create(XX, YY, TypNPC: integer);
 begin
-  X := (XX + 1) * 33 + 17;  //pridavame nepriatelov do policok
-  Y := (YY + 1) * 33 + 17;
+  Zomrel := False;
+  X := (XX + 1) * pixel + 17;  //pridavame nepriatelov do policok
+  Y := (YY + 1) * pixel + 17;
   Typ := TypNPC; //aky typ npc to je
   Smer := 0; //defaulny smer statia
   PohybujeSa := False; //nepohybuje sa

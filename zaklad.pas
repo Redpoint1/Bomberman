@@ -27,9 +27,6 @@ type
     { public declarations }
   end;
 
-const
-  pixel: integer = 33;
-
 var
   Form1: TForm1;
   Hrac: TPlayer;  //objekt hraca
@@ -44,17 +41,17 @@ implementation
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
-  obr: TBitmap;
+  obr: TBitMap;
 begin
   Randomize;
   Image1.Canvas.Brush.Color := Form1.Color;
   Image1.Canvas.FillRect(Form1.ClientRect);
-  obr := TBitmap.Create;
+  obr := TBitMap.Create;
   obr.LoadFromFile('img/gui.bmp');
   Image1.Canvas.Draw(831, 66, Obr);
   Wall := TSteny.Create;
   Wall.Nacitaj('level', Image1.Height, Image1.Width); //nacitanie mpay z LEVEL(.txt)
-  Hrac := TPlayer.Create(2 * 33 + 17, 2 * 33 + 17);
+  Hrac := TPlayer.Create(2 * pixel + 17, 2 * pixel + 17);
   //vytvorenie hraca s pociatocnym x a y
   Nepriatel := TNepriatel.Create();
   Nepriatel.Nacitaj('level'); //nacitanie nepriatelov z LEVEL(.txt)
@@ -64,18 +61,20 @@ procedure TForm1.FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState)
 begin
   if (key = VK_SPACE) then //ak stlacime medzernik
   begin
-    if (Wall.Steny[(Hrac.Y div 33) - 2][(Hrac.X div 33) - 2].Typ <> 2) then
+    if (Wall.Steny[(Hrac.Y div pixel) - 2][(Hrac.X div pixel) - 2].Typ <> 2) then
       //overenie ci na danej kosticke nie je uz bomba
     begin
       setlength(Hrac.Bomby, length(Hrac.Bomby) + 1);
       Hrac.Bomby[high(Hrac.Bomby)] :=
-        TBomba.Create(((Hrac.X div 33) * 33 + 17), ((Hrac.Y div 33) * 33 + 17), 3, 2);
+        TBomba.Create(((Hrac.X div pixel) * pixel + 17),
+        ((Hrac.Y div pixel) * pixel + 17), 3, 2);
       //vytvorenie a nastavenie pozicie bomby s radiusom a casov vybuchnutia
-      Wall.Steny[(Hrac.Y div 33) - 2][(Hrac.X div 33) - 2].Typ := 2;
+      Wall.Steny[(Hrac.Y div pixel) - 2][(Hrac.X div pixel) - 2].Typ := 2;
       //nastavime kosticku mapy ,ze je tam polozena bomba
     end;
   end;
-  if (not (Hrac.PohybujeSa) and (Key <> VK_SPACE)) then //ak sa nepohybuje hrac
+  if (not (Hrac.PohybujeSa) and not (Hrac.Zomrel) and (Key in KlavesnicePohybu)) then
+    //ak sa nepohybuje hrac
   begin
     case Key of
       VK_UP: Hrac.Smer := 0; //smer hraca ktorym pojde
@@ -86,7 +85,7 @@ begin
     if (Hrac.OverPosun(Wall)) then
       //overi posun hraca ci moze ist na danu kosticku ak je stlaceny jeden z klaves s ktorymi sa pohybuje
     begin
-      Hrac.Faza := 33; //resetovanie fazy animovania
+      Hrac.Faza := 32; //resetovanie fazy animovania
       Hrac.Opacne := False; //kolisanie a stupanie fazy pohybovania
       Hrac.PohybujeSa := True; //nastavime pohybovanie hraca
       Timer2.Enabled := True;

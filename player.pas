@@ -27,7 +27,8 @@ type
   TPlayer = class
     Zivot, X, Y, SpawnX, SpawnY, Smer, Faza: integer;
     //pozicia hraca, suradnice ozivenia pri zabiti, orientacia pohy a fazy animacie
-    PohybujeSa, Opacne: boolean;  //ci sa pohybuje a opakovanie animacie pohybovania
+    Zomrel, PohybujeSa, Opacne: boolean;
+    //ci zomrel, sa pohybuje a opakovanie animacie pohybovania
     Bomby: array of TBomba;  //polozene bomby hraca
     BombyObr: array[0..1] of TBitMap;  //animacie bomby
     HracObr: array[0..4] of array[0..2] of TBitMap; //animacie hraca
@@ -45,9 +46,6 @@ type
     function OverVybuch(Okolie: TSteny): boolean; //zabitie hraca ak ho zasiahla bomba
     constructor Create(XX, YY: integer);  //vytvorenie hraca
   end;
-
-const
-  PovoleneBloky = [0, 2];
 
 
 implementation
@@ -137,18 +135,31 @@ end;
 procedure TPlayer.Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel;
   Cas: TTimer);
 begin
-  if ((OverVybuch(Okolie)) or (OverNpc(Nepriatel))) then
-    //overi ci nieco hraca nezabije a ak ano tak ho hodi na spaw a znizi mu zivot + zastavi pohyn hraca
+  if ((OverVybuch(Okolie)) or (OverNpc(Nepriatel)) and not (Zomrel)) then
+    //overi ci nieco hraca nezabije a ak ano tak ho hodi na spaw a znizi mu zivot + zastavi pohyb hraca ak neprebieha animacia umrtia
   begin
     if (Cas.Enabled) then
     begin
       Cas.Enabled := False;
       PohybujeSa := False;
     end;
-    X := SpawnX;
-    Y := SpawnY;
+    Zomrel := True;
+    Faza := 0;
+    Smer := 4;
     Zivot := Zivot - 1;
   end;
+  if (Zomrel) then
+    if (Faza = 32) then
+    begin
+      Zomrel := False;
+      X := SpawnX;
+      Y := SpawnY;
+      Smer := 1;
+    end
+    else
+    begin
+      Inc(Faza);
+    end;
   if (PohybujeSa) then  //ak sa pohybuje
   begin
     if (Faza = 1) then //opacne kreslenie obrazkov pohybu (zacyklovanie animacie pohybu)
@@ -176,20 +187,21 @@ begin
       Obr.Draw(Bomby[j].x - 17, Bomby[j].y - 17, BombyObr[Bomby[j].Faza])
     else   //inac vybuchne bomba
     begin
-      Walli.Steny[Bomby[j].y div 33 - 2][Bomby[j].x div 33 - 2].Typ := 0;
+      Walli.Steny[Bomby[j].y div pixel - 2][Bomby[j].x div pixel - 2].Typ := 0;
       //zmena policka mapy
-      for i := (Bomby[j].x div 33) downto (Bomby[j].x div 33 - Bomby[j].radius) do
+      for i := (Bomby[j].x div pixel) downto (Bomby[j].x div pixel - Bomby[j].radius) do
         //nastavi policka na vybuchnutie
         //dolava
       begin
-        if (Bomby[j].OverStenu(Walli, Bomby[j].y div 33 - 2, i - 2, 2)) then
+        if (Bomby[j].OverStenu(Walli, Bomby[j].y div pixel - 2, i - 2, 2)) then
           //overuje ci nie je stena
         begin
-          if (i = (Bomby[j].x div 33 - Bomby[j].radius)) then  //zvacsuje radius vybuchu
+          if (i = (Bomby[j].x div pixel - Bomby[j].radius)) then
+            //zvacsuje radius vybuchu
           begin
-            Walli.Steny[Bomby[j].y div 33 - 2][i - 2].Obraz := Walli.BombyObr[0][0];
+            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].Obraz := Walli.BombyObr[0][0];
             //nastavi obrazok policka mapy na vybuch
-            Walli.Steny[Bomby[j].y div 33 - 2][i - 2].BombaSmer := 0;
+            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].BombaSmer := 0;
             //nastavi smer bomby
           end;
         end
@@ -199,14 +211,15 @@ begin
         end;
       end;
       //opakovanie pre vsetky smery
-      for i := (Bomby[j].x div 33) to (Bomby[j].x div 33 + Bomby[j].radius) do //doprava
+      for i := (Bomby[j].x div pixel) to (Bomby[j].x div pixel + Bomby[j].radius) do
+        //doprava
       begin
-        if (Bomby[j].OverStenu(Walli, Bomby[j].y div 33 - 2, i - 2, 3)) then
+        if (Bomby[j].OverStenu(Walli, Bomby[j].y div pixel - 2, i - 2, 3)) then
         begin
-          if (i = (Bomby[j].x div 33 + Bomby[j].radius)) then
+          if (i = (Bomby[j].x div pixel + Bomby[j].radius)) then
           begin
-            Walli.Steny[Bomby[j].y div 33 - 2][i - 2].Obraz := Walli.BombyObr[0][3];
-            Walli.Steny[Bomby[j].y div 33 - 2][i - 2].BombaSmer := 3;
+            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].Obraz := Walli.BombyObr[0][3];
+            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].BombaSmer := 3;
           end;
         end
         else
@@ -214,14 +227,15 @@ begin
           break;
         end;
       end;
-      for i := (Bomby[j].y div 33) to (Bomby[j].y div 33 + Bomby[j].radius) do //dole
+      for i := (Bomby[j].y div pixel) to (Bomby[j].y div pixel + Bomby[j].radius) do
+        //dole
       begin
-        if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div 33 - 2, 1)) then
+        if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div pixel - 2, 1)) then
         begin
-          if (i = (Bomby[j].y div 33 + Bomby[j].radius)) then
+          if (i = (Bomby[j].y div pixel + Bomby[j].radius)) then
           begin
-            Walli.Steny[i - 2][Bomby[j].x div 33 - 2].Obraz := Walli.BombyObr[0][6];
-            Walli.Steny[i - 2][Bomby[j].x div 33 - 2].BombaSmer := 6;
+            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].Obraz := Walli.BombyObr[0][6];
+            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].BombaSmer := 6;
           end;
         end
         else
@@ -229,15 +243,15 @@ begin
           break;
         end;
       end;
-      for i := (Bomby[j].y div 33) downto (Bomby[j].y div 33 - Bomby[j].radius) do
+      for i := (Bomby[j].y div pixel) downto (Bomby[j].y div pixel - Bomby[j].radius) do
         //hore
       begin
-        if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div 33 - 2, 0)) then
+        if (Bomby[j].OverStenu(Walli, i - 2, Bomby[j].x div pixel - 2, 0)) then
         begin
-          if (i = (Bomby[j].y div 33 - Bomby[j].radius)) then
+          if (i = (Bomby[j].y div pixel - Bomby[j].radius)) then
           begin
-            Walli.Steny[i - 2][Bomby[j].x div 33 - 2].Obraz := Walli.BombyObr[0][5];
-            Walli.Steny[i - 2][Bomby[j].x div 33 - 2].BombaSmer := 5;
+            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].Obraz := Walli.BombyObr[0][5];
+            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].BombaSmer := 5;
           end;
         end
         else
@@ -245,9 +259,9 @@ begin
           break;
         end;
       end;
-      Walli.Steny[Bomby[j].y div 33 - 2][Bomby[j].x div 33 - 2].Obraz :=
+      Walli.Steny[Bomby[j].y div pixel - 2][Bomby[j].x div pixel - 2].Obraz :=
         Walli.BombyObr[0][2];
-      Walli.Steny[Bomby[j].y div 33 - 2][Bomby[j].x div 33 - 2].BombaSmer := 2;
+      Walli.Steny[Bomby[j].y div pixel - 2][Bomby[j].x div pixel - 2].BombaSmer := 2;
     end;
   end;
   ZmazBomby; //zmaze vybuchnute bomby
@@ -301,41 +315,43 @@ begin
     begin
       if ((Y - 2) < 66) then //ak je koniec mapy
         exit;
-      if ((Okolie.Steny[(Y - 2) div 33 - 2][(X - 10) div 33 - 2].Typ in
-        PovoleneBloky) and (Okolie.Steny[(Y - 2) div 33 - 2][(X + 7) div 33 - 2].Typ in
-        PovoleneBloky)) then //ak sa moze posunut
+      if ((Okolie.Steny[(Y - 2) div pixel - 2][(X - 10) div pixel - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y - 2) div pixel - 2][(X + 7) div
+        pixel - 2].Typ in PovoleneBloky)) then //ak sa moze posunut
         Result := True;
     end;
     //opakovanie pre vsetky smery
     1:
     begin
-      if (((Y + 16) div 33 - 2) > Length(Okolie.Steny) - 1) then
+      if (((Y + 16) div pixel - 2) > Length(Okolie.Steny) - 1) then
         exit;
-      if (Okolie.Steny[(Y + 12) div 33 - 2][(X - 10) div 33 - 2].Typ in
-        PovoleneBloky) and (Okolie.Steny[(Y + 8) div 33 - 2][(X + 7) div 33 - 2].Typ in
-        PovoleneBloky) then
+      if (Okolie.Steny[(Y + 12) div pixel - 2][(X - 10) div pixel - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y + 12) div pixel -
+        2][(X + 7) div pixel - 2].Typ in PovoleneBloky) then
         Result := True;
     end;
     2:
     begin
       if ((X - 11) < 66) then
         exit;
-      if ((Okolie.Steny[(Y - 1) div 33 - 2][(X - 10) div 33 - 2].Typ in
-        PovoleneBloky) and (Okolie.Steny[(Y - 1) div 33 - 2][(X + 10) div 33 - 2].Typ in
-        PovoleneBloky) and (Okolie.Steny[(Y + 11) div 33 - 2][(X - 10) div 33 - 2].Typ in
-        PovoleneBloky) and (Okolie.Steny[(Y + 11) div 33 - 2][(X + 10) div 33 - 2].Typ in
-        PovoleneBloky)) then
+      if ((Okolie.Steny[(Y - 1) div pixel - 2][(X - 11) div pixel - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y - 1) div pixel - 2][(X + 9) div
+        pixel - 2].Typ in PovoleneBloky) and
+        (Okolie.Steny[(Y + 11) div pixel - 2][(X - 11) div pixel - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y + 11) div pixel -
+        2][(X + 9) div pixel - 2].Typ in PovoleneBloky)) then
         Result := True;
     end;
     3:
     begin
-      if (((X + 11) div 33 - 2) > Length(Okolie.Steny[Y div 33 - 2]) - 1) then
+      if (((X + 11) div pixel - 2) > Length(Okolie.Steny[Y div pixel - 2]) - 1) then
         exit;
-      if ((Okolie.Steny[(Y - 1) div 33 - 2][(X - 10) div 33 - 2].Typ in
-        PovoleneBloky) and (Okolie.Steny[(Y - 1) div 33 - 2][(X + 10) div 33 - 2].Typ in
-        PovoleneBloky) and (Okolie.Steny[(Y + 11) div 33 - 2][(X - 10) div 33 - 2].Typ in
-        PovoleneBloky) and (Okolie.Steny[(Y + 11) div 33 - 2][(X + 10) div 33 - 2].Typ in
-        PovoleneBloky)) then
+      if ((Okolie.Steny[(Y - 1) div pixel - 2][(X - 9) div pixel - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y - 1) div pixel - 2][(X + 10) div
+        pixel - 2].Typ in PovoleneBloky) and
+        (Okolie.Steny[(Y + 11) div pixel - 2][(X - 9) div pixel - 2].Typ in
+        PovoleneBloky) and (Okolie.Steny[(Y + 11) div pixel -
+        2][(X + 10) div pixel - 2].Typ in PovoleneBloky)) then
         Result := True;
     end;
   end;
@@ -344,7 +360,7 @@ end;
 function TPlayer.OverVybuch(Okolie: TSteny): boolean;
 begin
   Result := False;
-  if (Okolie.Steny[Y div 33 - 2][X div 33 - 2].Typ = 3) then
+  if (Okolie.Steny[Y div pixel - 2][X div pixel - 2].Typ = 3) then
     //ak sa hrac nachadza v policku kde je vybuch zabije ho
     Result := True;
 end;
@@ -359,33 +375,32 @@ begin
   Y := YY;
   SpawnX := XX;
   SpawnY := YY;
+  Zomrel := False;
   PohybujeSa := False;
   Opacne := False;
   Smer := 0;
   setlength(Bomby, 0);
-  Obrazok := TBitmap.Create;
+  Obrazok := TBitMap.Create;
   Obrazok.LoadFromFile('img/bomba.bmp');  //nacitavanie obrazkov bomby
   for i := 0 to 1 do
   begin
-    BombyObr[i] := TBitmap.Create;
-    BombyObr[i].Width := 33;
-    BombyObr[i].Height := 33;
-    BombyObr[i].Transparent := True;
-    BombyObr[i].TransparentColor := clFuchsia;
+    BombyObr[i] := TBitMap.Create;
+    BombyObr[i].Width := pixel;
+    BombyObr[i].Height := pixel;
     BombyObr[i].PixelFormat := pf24bit;
-    BombyObr[i].Canvas.Draw(-i * 33, -0, Obrazok);
+    BombyObr[i].Canvas.Draw(-i * pixel, -0, Obrazok);
   end;
   Obrazok.LoadFromFile('img/player.bmp'); //nacotavanie obrazko hraca
   for j := 0 to 4 do
     for i := 0 to 2 do
     begin
-      HracObr[j][i] := TBitmap.Create;
-      HracObr[j][i].Width := 33;
-      HracObr[j][i].Height := 33;
+      HracObr[j][i] := TBitMap.Create;
+      HracObr[j][i].Width := pixel;
+      HracObr[j][i].Height := pixel;
       HracObr[j][i].Transparent := True;
       HracObr[j][i].TransparentColor := Obrazok.Canvas.Pixels[0, 0];
       HracObr[j][i].PixelFormat := pf24bit;
-      HracObr[j][i].Canvas.Draw(-i * 33, -j * 33, Obrazok);
+      HracObr[j][i].Canvas.Draw(-i * pixel, -j * pixel, Obrazok);
     end;
   Obrazok.Free;
 end;
