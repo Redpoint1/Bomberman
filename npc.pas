@@ -21,6 +21,7 @@ type
   { TNepriatel }
 
   TNepriatel = class  //trieda nepratelov (viacerych)
+    Skore : integer;
     NPC: array of TNpc; //pole objektov nepriatelov
     NpcObr: array[0..0] of array[0..2] of TBitMap; //obrazky nepriatelov
     procedure Pridaj(XX, YY, Typ: integer); //pridanie dalsieho nepriatela
@@ -34,6 +35,8 @@ type
     procedure Posun(Koho: TNpc); //zmena suradnic nepriatela
     procedure OverVybuch(Okolie: TSteny); //overenie ci nepiratela zasiahol vybuch
     procedure Nacitaj(S: string);  //nacitanie zo suboru poziciu a typ nepriatela
+    procedure PridajSkore(Nepriatel : TNPC); //pripocita skore podla typu nepriatela
+    function vratSkore:Integer;
     function OverPosun(Komu: TNpc; Okolie: TSteny): boolean;
     //overenie ci sa moze posunu do daneho policka
   end;
@@ -54,7 +57,7 @@ var
 begin
   j := 0;    //zmazeme zaniknutych nepriatelov a skracujeme pole nepriatelov
   for i := 0 to length(NPC) - 1 do
-    if (NPC[i] <> nil) then
+    if ((NPC[i] <> nil) and (((NPC[i].Zomrel) and (NPC[i].Sekunda > 0)) or not(NPC[i].Zomrel))) then
     begin
       NPC[j] := NPC[i];
       Inc(j);
@@ -102,16 +105,8 @@ begin
     end
     else
     begin
-      if (NPC[i].Sekunda <= 0) then
-      begin
-        FreeAndNil(NPC[i]);
-        VymazNilNpc;
-      end
-      else
-      begin
-        Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][2]);
-        Dec(NPC[i].Sekunda, 10);
-      end;
+      Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][2]);
+      Dec(NPC[i].Sekunda, 10);
     end;
   end;
 end;
@@ -207,11 +202,11 @@ var
 begin
   for i := 0 to length(NPC) - 1 do
     //pre vsetkych nepriatelov overi ci nezabilo ich vybuch
-    if (Okolie.Steny[NPC[i].Y div pixel - 2][NPC[i].X div pixel - 2].Typ = 3) then
+    if ((Okolie.Steny[NPC[i].Y div pixel - 2][NPC[i].X div pixel - 2].Typ = 3) and not(NPC[i].Zomrel))then
     begin
-      NPC[i].Zomrel := True;
-      ;   //ak ano tak zomrel
-      NPC[i].Sekunda := 500;
+      NPC[i].Zomrel := True;  //ak ano tak zomrel
+      NPC[i].Sekunda := 500; //cas animacie
+      PridajSkore(NPC[i]);
     end;
 end;
 
@@ -237,6 +232,21 @@ begin
     until EOF(Sub);  //nacitavame nepriatelov pokial nie je koniec suboru
     CloseFile(Sub);
   end;
+end;
+
+procedure TNepriatel.PridajSkore(Nepriatel: TNPC);
+begin
+  case Nepriatel.Typ of
+    0: Inc(Skore,1000);
+    1: Inc(Skore,1000);
+    2: Inc(Skore,2000);
+  end;
+end;
+
+function TNepriatel.vratSkore: Integer;
+begin
+  Result := Skore;
+  Skore := 0;
 end;
 
 function TNepriatel.OverPosun(Komu: TNpc; Okolie: TSteny): boolean;

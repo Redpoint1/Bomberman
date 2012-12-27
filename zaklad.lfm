@@ -8,27 +8,30 @@ object Form1: TForm1
   ClientHeight = 660
   ClientWidth = 990
   Color = clGray
+  Font.Color = clWhite
+  Font.Height = -24
+  Font.Style = [fsBold]
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnKeyUp = FormKeyUp
   LCLVersion = '1.0.4.0'
-  object Image1: TImage
+  object HryObraz: TImage
     Left = 0
     Height = 660
     Top = 0
     Width = 990
     Align = alClient
   end
-  object Timer1: TTimer
+  object HraCas: TTimer
     Interval = 10
-    OnTimer = Timer1Timer
+    OnTimer = HraCasTimer
     left = 920
     top = 608
   end
-  object Timer2: TTimer
+  object HracCas: TTimer
     Enabled = False
     Interval = 10
-    OnTimer = Timer2Timer
+    OnTimer = HracCasTimer
     left = 872
     top = 608
   end

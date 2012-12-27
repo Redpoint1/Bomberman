@@ -25,7 +25,7 @@ type
   { TPlayer }
 
   TPlayer = class
-    Zivot, X, Y, SpawnX, SpawnY, Smer, Faza: integer;
+    Zivot, X, Y, SpawnX, SpawnY, Smer, Faza, Skore: integer;
     //pozicia hraca, suradnice ozivenia pri zabiti, orientacia pohy a fazy animacie
     Zomrel, PohybujeSa, Opacne: boolean;
     //ci zomrel, sa pohybuje a opakovanie animacie pohybovania
@@ -135,7 +135,7 @@ end;
 procedure TPlayer.Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel;
   Cas: TTimer);
 begin
-  if ((OverVybuch(Okolie)) or (OverNpc(Nepriatel)) and not (Zomrel)) then
+  if (((OverVybuch(Okolie)) or (OverNpc(Nepriatel))) and not (Zomrel)) then
     //overi ci nieco hraca nezabije a ak ano tak ho hodi na spaw a znizi mu zivot + zastavi pohyb hraca ak neprebieha animacia umrtia
   begin
     if (Cas.Enabled) then
@@ -144,14 +144,15 @@ begin
       PohybujeSa := False;
     end;
     Zomrel := True;
-    Faza := 0;
+    Faza := -1;
     Smer := 4;
     Zivot := Zivot - 1;
   end;
   if (Zomrel) then
-    if (Faza = 32) then
+    if (Faza = 65) then
     begin
       Zomrel := False;
+      Faza := 32;
       X := SpawnX;
       Y := SpawnY;
       Smer := 1;
@@ -171,7 +172,10 @@ begin
     else
       Dec(Faza);
   end;
-  Obr.Draw(X - 17, Y - 17, HracObr[Smer][Faza div 11]);
+  if (Zomrel) then
+     Obr.Draw(X - 17, Y - 17, HracObr[Smer][Faza div 22])
+  else
+     Obr.Draw(X - 17, Y - 17, HracObr[Smer][Faza div 11]);
   //vykreslenie daneho obrazku pohybu hraca
 end;
 
@@ -370,6 +374,7 @@ var
   Obrazok: TBitMap;
   i, j: integer;
 begin
+  Skore := 0;
   Zivot := 3;
   X := XX;
   Y := YY;
