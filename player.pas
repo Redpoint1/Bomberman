@@ -25,7 +25,7 @@ type
   { TPlayer }
 
   TPlayer = class
-    Zivot, X, Y, SpawnX, SpawnY, Smer, Faza, Skore: integer;
+    Zivot, X, Y, SpawnX, SpawnY, Smer, Faza, Skore, PocetBomb: integer;
     //pozicia hraca, suradnice ozivenia pri zabiti, orientacia pohy a fazy animacie
     Zomrel, PohybujeSa, Opacne: boolean;
     //ci zomrel, sa pohybuje a opakovanie animacie pohybovania
@@ -374,6 +374,7 @@ var
   Obrazok: TBitMap;
   i, j: integer;
 begin
+  PocetBomb := 3;
   Skore := 0;
   Zivot := 3;
   X := XX;

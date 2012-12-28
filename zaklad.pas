@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, LCLType, player, game, npc;
+  ExtCtrls, LCLType, Buttons, player, game, npc;
 
 type
 
@@ -16,11 +16,17 @@ type
     HryObraz: TImage;
     HraCas: TTimer;
     HracCas: TTimer;
+    NewGame: TSpeedButton;
+    Nastavenia: TSpeedButton;
+    MenuPanel: TPanel;
+    Quit: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure HraCasTimer(Sender: TObject);
     procedure HracCasTimer(Sender: TObject);
+    procedure NewGameClick(Sender: TObject);
+    procedure QuitClick(Sender: TObject);
     procedure VykresliInfo(Obraz : TCanvas; Informacie : TPlayer);
   private
     { private declarations }
@@ -52,17 +58,13 @@ begin
   HryObraz.Canvas.Font.Size := 18;
   HryObraz.Canvas.Font.Color := clWhite;
   HryObraz.Canvas.Font.Bold := true;
-  Wall := TSteny.Create;
-  Wall.Nacitaj('level', HryObraz.Height, HryObraz.Width); //nacitanie mpay z LEVEL(.txt)
-  Hrac := TPlayer.Create(2 * pixel + 17, 2 * pixel + 17);
-  //vytvorenie hraca s pociatocnym x a y
-  Nepriatel := TNepriatel.Create();
-  Nepriatel.Nacitaj('level'); //nacitanie nepriatelov z LEVEL(.txt)
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
 begin
-  if (key = VK_SPACE) then //ak stlacime medzernik
+  if not(HraCas.Enabled) then
+     exit;
+  if ((key = VK_SPACE) and (Hrac.PocetBomb > length(Hrac.Bomby))) then //ak stlacime medzernik
   begin
     if (Wall.Steny[(Hrac.Y div pixel) - 2][(Hrac.X div pixel) - 2].Typ <> 2) then
       //overenie ci na danej kosticke nie je uz bomba
@@ -99,6 +101,8 @@ end;
 
 procedure TForm1.FormKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
 begin
+  if not(HraCas.Enabled) then
+     exit;
   if ((Hrac.PohybujeSa) and (Key <> VK_SPACE)) then
   begin
     HracCas.Enabled := False;
@@ -133,12 +137,29 @@ begin
   end;
 end;
 
+procedure TForm1.NewGameClick(Sender: TObject);
+begin
+  Wall := TSteny.Create;
+  Wall.Nacitaj('level', HryObraz.Height, HryObraz.Width); //nacitanie mpay z LEVEL(.txt)
+  Hrac := TPlayer.Create(2 * pixel + 17, 2 * pixel + 17);
+  //vytvorenie hraca s pociatocnym x a y
+  Nepriatel := TNepriatel.Create();
+  Nepriatel.Nacitaj('level'); //nacitanie nepriatelov z LEVEL(.txt)
+  HraCas.Enabled := True;
+  MenuPanel.Hide;
+end;
+
+procedure TForm1.QuitClick(Sender: TObject);
+begin
+ Close;
+end;
+
 procedure TForm1.VykresliInfo(Obraz: TCanvas; Informacie: TPlayer);
 begin
   HryObraz.Canvas.Draw(831, 66, gui);
   Obraz.TextOut(915,85, 'x '+IntToStr(Informacie.Zivot));
   Obraz.TextOut(865,125, format('%.6d', [Informacie.Skore]));
-  Obraz.TextOut(895,190, IntToStr(Length(Informacie.Bomby))+ ' / '+IntToStr(3));
+  Obraz.TextOut(895,190, IntToStr(Length(Informacie.Bomby))+ ' / '+IntToStr(Informacie.PocetBomb));
   Obraz.Font.Size := 9;
   Obraz.Font.Bold := false;
   Obraz.TextOut(895,154, 'Skóre');
