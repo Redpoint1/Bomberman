@@ -22,7 +22,7 @@ type
 
   TSteny = class   //trieda celej mapy
     Steny: array of array of TStena;  //mapa z policok v poli
-    StenyObr: array[0..4] of TBitMap; //obrazky roznych stien
+    StenyObr: array[0..5] of TBitMap; //obrazky roznych stien
     BombyObr: array[0..4] of array[0..6] of TBitMap; //obrazky a fazy vybuchov bomby
     procedure Vykresli(Obr: TCanvas); //vykreslenie celej mapy na obrazok
     procedure ZmenFazu;  //zmena fazy vybuchu
@@ -32,10 +32,11 @@ type
     constructor Create();
   end;
 
-const
-  pixel: integer = 33;
+const //zdielane konstanty v hre
+  pixel: integer = 33; //kolko pixelov ma jedna kocka 33x33
   PovoleneBloky = [0, 2];
-  KlavesnicePohybu = [VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT];
+  //povolene bloky ,cez ktore moze hrac prechadzat (volne policko a bomba)
+  KlavesnicePohybu = [VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT]; //klavesy pohybu hraca
 
 implementation
 
@@ -144,8 +145,8 @@ begin
   for i := 0 to length(Steny) - 1 do
     for j := 0 to length(Steny[i]) - 1 do //pre vsetky policka
     begin
-      if ((Steny[i][j].Typ < 2) or (Steny[i][j].Typ = 4)) then
-        //pokial typ steny nie je vybuch priradi obrazok
+      if ((Steny[i][j].Typ < 2) or (Steny[i][j].Typ > 3)) then
+        //pokial typ steny nie je vybuch a bomba priradi obrazok
         Steny[i][j].Obraz := StenyObr[Steny[i][j].Typ];
     end;
 end;
@@ -164,7 +165,7 @@ begin
     StenyObr[i].Width := pixel;
     StenyObr[i].Height := pixel;
     StenyObr[i].PixelFormat := pf24bit;
-    StenyObr[i].Canvas.Draw(-i * pixel, -0, Obrazok);
+    StenyObr[i].Canvas.Draw(-(i mod 5) * pixel, -(i div 5) * pixel, Obrazok);
   end;
   Obrazok.LoadFromFile('img/bomba.bmp'); //nacitanie vybuchov
   for i := 0 to 4 do

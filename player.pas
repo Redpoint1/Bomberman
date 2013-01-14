@@ -149,7 +149,7 @@ begin
     Zivot := Zivot - 1;
   end;
   if (Zomrel) then
-    if (Faza = 65) then
+    if (Faza = 65) then //ak skonci animacia umrtia vrat na spawn
     begin
       Zomrel := False;
       Faza := 32;
@@ -159,7 +159,7 @@ begin
     end
     else
     begin
-      Inc(Faza);
+      Inc(Faza); //inac animuj umrtie
     end;
   if (PohybujeSa) then  //ak sa pohybuje
   begin
@@ -173,9 +173,9 @@ begin
       Dec(Faza);
   end;
   if (Zomrel) then
-     Obr.Draw(X - 17, Y - 17, HracObr[Smer][Faza div 22])
+    Obr.Draw(X - 17, Y - 17, HracObr[Smer][Faza div 22])
   else
-     Obr.Draw(X - 17, Y - 17, HracObr[Smer][Faza div 11]);
+    Obr.Draw(X - 17, Y - 17, HracObr[Smer][Faza div 11]);
   //vykreslenie daneho obrazku pohybu hraca
 end;
 

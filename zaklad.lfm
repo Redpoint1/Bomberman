@@ -23,7 +23,7 @@ object Form1: TForm1
     Align = alClient
   end
   object MenuPanel: TPanel
-    Left = 344
+    Left = 368
     Height = 136
     Top = 160
     Width = 258

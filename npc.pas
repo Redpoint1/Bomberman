@@ -21,7 +21,7 @@ type
   { TNepriatel }
 
   TNepriatel = class  //trieda nepratelov (viacerych)
-    Skore : integer;
+    Skore: integer; //celkovy pocet skore hraca ,ktore ziskal vybuchom
     NPC: array of TNpc; //pole objektov nepriatelov
     NpcObr: array[0..0] of array[0..2] of TBitMap; //obrazky nepriatelov
     procedure Pridaj(XX, YY, Typ: integer); //pridanie dalsieho nepriatela
@@ -35,8 +35,8 @@ type
     procedure Posun(Koho: TNpc); //zmena suradnic nepriatela
     procedure OverVybuch(Okolie: TSteny); //overenie ci nepiratela zasiahol vybuch
     procedure Nacitaj(S: string);  //nacitanie zo suboru poziciu a typ nepriatela
-    procedure PridajSkore(Nepriatel : TNPC); //pripocita skore podla typu nepriatela
-    function vratSkore:Integer;
+    procedure PridajSkore(Nepriatel: TNPC); //pripocita skore podla typu nepriatela
+    function vratSkore: integer; //vrati pocet skore
     function OverPosun(Komu: TNpc; Okolie: TSteny): boolean;
     //overenie ci sa moze posunu do daneho policka
   end;
@@ -57,7 +57,8 @@ var
 begin
   j := 0;    //zmazeme zaniknutych nepriatelov a skracujeme pole nepriatelov
   for i := 0 to length(NPC) - 1 do
-    if ((NPC[i] <> nil) and (((NPC[i].Zomrel) and (NPC[i].Sekunda > 0)) or not(NPC[i].Zomrel))) then
+    if ((NPC[i] <> nil) and (((NPC[i].Zomrel) and (NPC[i].Sekunda > 0)) or not
+      (NPC[i].Zomrel))) then
     begin
       NPC[j] := NPC[i];
       Inc(j);
@@ -96,16 +97,17 @@ begin
   VymazNilNpc;   //zmazeme ktorych zasiahol vybuch
   for i := 0 to length(NPC) - 1 do
   begin
-    if not (NPC[i].Zomrel) then
+    if not (NPC[i].Zomrel) then  //ak nevybuchol
     begin
       PohybujSa(NPC[i], Okolie);
       //zmena pozicie pri pohybovani ,alebo priradenie dalsieho pohybu na ine policko
       Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][NPC[i].Faza div 50]);
       //vykreslenie
     end
-    else
+    else  //ak vybuchol
     begin
       Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][2]);
+      //zrob animaciu umrtia
       Dec(NPC[i].Sekunda, 10);
     end;
   end;
@@ -202,11 +204,12 @@ var
 begin
   for i := 0 to length(NPC) - 1 do
     //pre vsetkych nepriatelov overi ci nezabilo ich vybuch
-    if ((Okolie.Steny[NPC[i].Y div pixel - 2][NPC[i].X div pixel - 2].Typ = 3) and not(NPC[i].Zomrel))then
+    if ((Okolie.Steny[NPC[i].Y div pixel - 2][NPC[i].X div pixel - 2].Typ = 3) and
+      not (NPC[i].Zomrel)) then
     begin
       NPC[i].Zomrel := True;  //ak ano tak zomrel
       NPC[i].Sekunda := 500; //cas animacie
-      PridajSkore(NPC[i]);
+      PridajSkore(NPC[i]); //pripocita hracovi skore
     end;
 end;
 
@@ -236,17 +239,17 @@ end;
 
 procedure TNepriatel.PridajSkore(Nepriatel: TNPC);
 begin
-  case Nepriatel.Typ of
-    0: Inc(Skore,1000);
-    1: Inc(Skore,1000);
-    2: Inc(Skore,2000);
+  case Nepriatel.Typ of  //podla typu nepriatela priradi definovany pocet bodov
+    0: Inc(Skore, 1000);
+    1: Inc(Skore, 1000);
+    2: Inc(Skore, 2000);
   end;
 end;
 
-function TNepriatel.vratSkore: Integer;
+function TNepriatel.vratSkore: integer;
 begin
-  Result := Skore;
-  Skore := 0;
+  Result := Skore; //vrati celkovy pocet skore (ziskanych vybuchom)
+  Skore := 0; //zresetuj skore
 end;
 
 function TNepriatel.OverPosun(Komu: TNpc; Okolie: TSteny): boolean;
