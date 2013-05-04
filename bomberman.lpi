@@ -35,7 +35,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="8">
       <Unit0>
         <Filename Value="bomberman.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -64,6 +64,27 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="npc"/>
       </Unit4>
+      <Unit5>
+        <Filename Value="upgradeform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Upgrade"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="upgradeform"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="share.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="share"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="highscore.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="HiSc"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="highscore"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

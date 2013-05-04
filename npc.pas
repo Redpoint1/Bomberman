@@ -5,17 +5,20 @@ unit npc;
 interface
 
 uses
-  Classes, SysUtils, Graphics, ExtCtrls, Dialogs, game;
+  Classes, SysUtils, Graphics, ExtCtrls, Dialogs, game, share;
 
 type
 
   { TNpc }
 
   TNpc = class  //trieda nepriatelov
-    X, Y, Smer, Faza, Typ, Sekunda: integer;
+    X, Y: real;
+    Smer, Faza, Typ, Sekunda: integer;
     //suradnice, orientacia pohybu, animacia, typ nepriatela, cas pohybu
     Zomrel, PohybujeSa: boolean; //prave sa pohybuje
     constructor Create(XX, YY, TypNPC: integer);
+    function GetX: integer; //real -> int
+    function GetY: integer; //to iste
   end;
 
   { TNepriatel }
@@ -58,13 +61,13 @@ begin
   j := 0;    //zmazeme zaniknutych nepriatelov a skracujeme pole nepriatelov
   for i := 0 to length(NPC) - 1 do
     if ((NPC[i] <> nil) and (((NPC[i].Zomrel) and (NPC[i].Sekunda > 0)) or not
-      (NPC[i].Zomrel))) then
+      (NPC[i].Zomrel))) then  //ak nie je nil a zaroven zomrel ,ale beha animacka ,alebo nezomrel
     begin
       NPC[j] := NPC[i];
       Inc(j);
-      //prehadzujeme zaniknutycha  hadzeme ich an koniec pola
+      //prehadzujeme nezaniknutycha na zaciatok pola
     end;
-  SetLength(NPC, j); //pole nepriatelov zmensujeme o pocet zaniknutych
+  SetLength(NPC, j); //pole nepriatelov zmensujeme o pocet nezaniknutych
 end;
 
 constructor TNepriatel.Create;
@@ -101,12 +104,13 @@ begin
     begin
       PohybujSa(NPC[i], Okolie);
       //zmena pozicie pri pohybovani ,alebo priradenie dalsieho pohybu na ine policko
-      Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][NPC[i].Faza div 50]);
+      Obr.Draw(NPC[i].GetX - 17, NPC[i].GetY - 17,
+        NpcObr[NPC[i].Typ][NPC[i].Faza div 50]);
       //vykreslenie
     end
     else  //ak vybuchol
     begin
-      Obr.Draw(NPC[i].X - 17, NPC[i].Y - 17, NpcObr[NPC[i].Typ][2]);
+      Obr.Draw(NPC[i].GetX - 17, NPC[i].GetY - 17, NpcObr[NPC[i].Typ][2]);
       //zrob animaciu umrtia
       Dec(NPC[i].Sekunda, 10);
     end;
@@ -123,12 +127,12 @@ begin
       //ak sa prave pohybuje a nezomrel
     begin
       Posun(NPC[i]); //zmenime poziciu
-      if (((NPC[i].X mod pixel) = 17) and ((NPC[i].Y mod pixel) = 17) and
+      if (((NPC[i].GetX mod pixel) = 17) and ((NPC[i].GetY mod pixel) = 17) and
         (NPC[i].Smer <> 0)) then  //ak doslo do stredu noveho policka
       begin
         NPC[i].PohybujeSa := False;  //skonci pohyb
       end;
-      if (((NPC[i].X mod pixel) = 17) and ((NPC[i].Y mod pixel) = 17) and
+      if (((NPC[i].GetX mod pixel) = 17) and ((NPC[i].GetY mod pixel) = 17) and
         (NPC[i].Smer = 0)) then  //ak je v strede policka
       begin
         if (NPC[i].Sekunda = 0) then //a uz skoncil pohyb
@@ -191,10 +195,10 @@ end;
 procedure TNepriatel.Posun(Koho: TNpc);
 begin
   case Koho.Smer of  //podla smeru zmenime suradnice nepriatela
-    1: Koho.Y := Koho.Y - 1;
-    2: Koho.Y := Koho.Y + 1;
-    3: Koho.X := Koho.X - 1;
-    4: Koho.X := Koho.X + 1;
+    1: Koho.Y := Koho.Y - NpcSpeed[Koho.Typ];
+    2: Koho.Y := Koho.Y + NpcSpeed[Koho.Typ];
+    3: Koho.X := Koho.X - NpcSpeed[Koho.Typ];
+    4: Koho.X := Koho.X + NpcSpeed[Koho.Typ];
   end;
 end;
 
@@ -204,7 +208,7 @@ var
 begin
   for i := 0 to length(NPC) - 1 do
     //pre vsetkych nepriatelov overi ci nezabilo ich vybuch
-    if ((Okolie.Steny[NPC[i].Y div pixel - 2][NPC[i].X div pixel - 2].Typ = 3) and
+    if ((Okolie.Steny[NPC[i].GetY div pixel - 2][NPC[i].GetX div pixel - 2].Typ = 3) and
       not (NPC[i].Zomrel)) then
     begin
       NPC[i].Zomrel := True;  //ak ano tak zomrel
@@ -215,25 +219,25 @@ end;
 
 procedure TNepriatel.Nacitaj(S: string);
 var
-  Sub: TextFile;
+  Sub: TFileStream;
   X, Y, Typ: integer;
 begin
-  if fileexists(S + '.txt') then //overenie ci existuje ten subor
+  if fileexists('mapy/'+S + '.dat') then //overenie ci existuje ten subor
   begin
-    AssignFile(Sub, S + '.txt'); //zadefinujeme a otvorime subor
-    Reset(Sub);
-    Readln(Sub, Y);
-    repeat
-      readln(Sub);
-      Dec(Y);
-    until Y = -2; //prejdeme cez subor pokial nenajdeme informacie o nepriateloch v subore
-    repeat
-      Read(Sub, X);
-      Read(Sub, Y);
-      Readln(Sub, Typ);
-      Pridaj(X, Y, Typ);
-    until EOF(Sub);  //nacitavame nepriatelov pokial nie je koniec suboru
-    CloseFile(Sub);
+    Sub := TFileStream.Create('mapy/' + S + '.dat', fmOpenRead); //zadefinujeme a otvorime subor
+    Sub.ReadBuffer(Y, 4);
+    Sub.ReadBuffer(X, 4);
+    Sub.Position := (X * Y + 3) * 4; //preskocime na poziciu kde zacinaju informacie o nepriateloch na mape
+    if (Sub.Size > Sub.Position) then //ak nejaky su
+    begin
+      repeat
+        Sub.ReadBuffer(X, 4);
+        Sub.ReadBuffer(Y, 4);
+        Sub.ReadBuffer(Typ, 4);
+        Pridaj(X, Y, Typ);
+      until Sub.Position = Sub.Size;  //nacitavame nepriatelov pokial nie je koniec suboru
+    end;
+    Sub.Free; //zatvorime subor
   end;
 end;
 
@@ -259,33 +263,37 @@ begin
     0: Result := True; //ak stoji tak nema ziadnu barieru kam by nemohol ist
     1: //hore
     begin
-      if ((Komu.Y div pixel - 1 - 2) < 0) then   //ak by chcel ist za okraje mapy
+      if ((Komu.GetY div pixel - 1 - 2) < 0) then   //ak by chcel ist za okraje mapy
         exit;
-      if (Okolie.Steny[Komu.Y div pixel - 1 - 2][Komu.X div pixel - 2].Typ = 0) then
-        //ak am volne policko kam moze ist
+      if (Okolie.Steny[Komu.GetY div pixel - 1 - 2][Komu.GetX div
+        pixel - 2].Typ in NpcBloky[Komu.Typ]) then
+        //ak moze ist do urcite typu policka
         Result := True;
     end;
     //opakuje sa
     2:  //dole
     begin
-      if ((Komu.Y div pixel + 1 - 2) > Length(Okolie.Steny) - 1) then
+      if ((Komu.GetY div pixel + 1 - 2) > Length(Okolie.Steny) - 1) then
         exit;
-      if (Okolie.Steny[Komu.Y div pixel + 1 - 2][Komu.X div pixel - 2].Typ = 0) then
+      if (Okolie.Steny[Komu.GetY div pixel + 1 - 2][Komu.GetX div
+        pixel - 2].Typ in NpcBloky[Komu.Typ]) then
         Result := True;
     end;
     3: //doprava
     begin
-      if ((Komu.X div pixel - 1 - 2) < 0) then
+      if ((Komu.GetX div pixel - 1 - 2) < 0) then
         exit;
-      if (Okolie.Steny[Komu.Y div pixel - 2][Komu.X div pixel - 1 - 2].Typ = 0) then
+      if (Okolie.Steny[Komu.GetY div pixel - 2][Komu.GetX div pixel -
+        1 - 2].Typ in NpcBloky[Komu.Typ]) then
         Result := True;
     end;
     4:  //dolava
     begin
-      if ((Komu.X div pixel + 1 - 2) >
-        Length(Okolie.Steny[Komu.Y div pixel - 2]) - 1) then
+      if ((Komu.GetX div pixel + 1 - 2) >
+        Length(Okolie.Steny[Komu.GetY div pixel - 2]) - 1) then
         exit;
-      if (Okolie.Steny[Komu.Y div pixel - 2][Komu.X div pixel + 1 - 2].Typ = 0) then
+      if (Okolie.Steny[Komu.GetY div pixel - 2][Komu.GetX div pixel +
+        1 - 2].Typ in NpcBloky[Komu.Typ]) then
         Result := True;
     end;
   end;
@@ -303,6 +311,16 @@ begin
   PohybujeSa := False; //nepohybuje sa
   Faza := 100;  //animacia nepriatela
   Sekunda := 1000;  //cas pohybu
+end;
+
+function TNpc.GetX: integer;
+begin
+  Result := Round(X);
+end;
+
+function TNpc.GetY: integer;
+begin
+  Result := Round(Y);
 end;
 
 end.

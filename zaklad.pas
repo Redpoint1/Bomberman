@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, LCLType, Buttons, player, game, npc;
+  ExtCtrls, LCLType, Buttons, player, game, npc, share, upgradeform, highscore;
 
 type
 
@@ -20,18 +20,25 @@ type
     Nastavenia: TSpeedButton;
     MenuPanel: TPanel;
     Quit: TSpeedButton;
+    Nacitaj: TSpeedButton;
+    Resume: TSpeedButton;
+    Highscore: TSpeedButton;
+    UpgradeBut: TSpeedButton;
+    Uloz: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
+    procedure HighscoreClick(Sender: TObject);
     procedure HraCasTimer(Sender: TObject);
     procedure HracCasTimer(Sender: TObject);
+    procedure NacitajClick(Sender: TObject);
+    procedure NastaveniaClick(Sender: TObject);
     procedure NewGameClick(Sender: TObject);
     procedure QuitClick(Sender: TObject);
+    procedure ResumeClick(Sender: TObject);
+    procedure UpgradeButClick(Sender: TObject);
+    procedure UlozClick(Sender: TObject);
     procedure VykresliInfo(Obraz: TCanvas; Informacie: TPlayer);
-  private
-    { private declarations }
-  public
-    { public declarations }
   end;
 
 var
@@ -39,7 +46,7 @@ var
   Hrac: TPlayer;  //objekt hraca
   Wall: TSteny;   // objekty mapy ,teda stien
   Nepriatel: TNepriatel;   //objekty nepriatelov
-  Gui: TBitmap;
+  Gui: TBitmap; // pomocna bitmapa (logo, informacna tabulka pocat hry)
 
 implementation
 
@@ -57,8 +64,8 @@ begin
   gui.Transparent := True;
   HryObraz.Canvas.Draw((HryObraz.Width div 2) - (gui.Width div 2), 15, gui);
   //vykreslenie loga v menu
+  gui.Transparent := False;
   gui.LoadFromFile('img/gui.bmp'); //nacitanie informacneho panelu pre hraca
-  HryObraz.Canvas.Brush.Style := bsClear;  //nastavenie pisma informacneho panelu hraca
   HryObraz.Canvas.Font.Size := 18;
   HryObraz.Canvas.Font.Color := clWhite;
   HryObraz.Canvas.Font.Bold := True;
@@ -68,23 +75,44 @@ procedure TForm1.FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState)
 begin
   if not (HraCas.Enabled) then //ak nezacala hra skonci
     exit;
-  if ((key = VK_SPACE) and (Hrac.PocetBomb > length(Hrac.Bomby))) then
-    //ak stlacime medzernik
+  if (key = VK_ESCAPE) then  //ak stlaci escape ukaze menu a pozastavi hru
   begin
-    if (Wall.Steny[(Hrac.Y div pixel) - 2][(Hrac.X div pixel) - 2].Typ <> 2) then
+    HraCas.Enabled := False;
+    HracCas.Enabled := False;
+    Resume.Show; //ukaze button na pokracovanie hry
+    HryObraz.Canvas.Brush.Color := Form1.Color;
+    HryObraz.Canvas.FillRect(Form1.ClientRect);
+    gui.LoadFromFile('img/logo.bmp');
+    gui.Transparent := True;
+    HryObraz.Canvas.Draw((HryObraz.Width div 2) - (gui.Width div 2), 15, gui);
+    //vykreslenie loga v menu
+    gui.Transparent := True;
+    gui.LoadFromFile('img/gui.bmp'); //nacitanie informacneho panelu pre hraca
+    HryObraz.Canvas.Font.Size := 18;
+    HryObraz.Canvas.Font.Color := clWhite;
+    HryObraz.Canvas.Font.Bold := True;
+    MenuPanel.Show;
+  end;
+  if ((key = VK_SPACE) and ((Hrac.PocetBomb + Hrac.UpgradePocetBomb) >
+    length(Hrac.Bomby)) and not (Hrac.Zomrel)) then
+    //ak stlacime medzernik a hrac nie je mrtvy polozi bombu
+  begin
+    if ((Wall.Steny[(Hrac.GetY div pixel) - 2][(Hrac.GetX div pixel) - 2].Typ <> 2) and
+      (Wall.Steny[(Hrac.GetY div pixel) - 2][(Hrac.GetX div pixel) -
+      2].Upgrade < 0)) then
       //overenie ci na danej kosticke nie je uz bomba
     begin
       setlength(Hrac.Bomby, length(Hrac.Bomby) + 1);
       Hrac.Bomby[high(Hrac.Bomby)] :=
-        TBomba.Create(((Hrac.X div pixel) * pixel + 17),
-        ((Hrac.Y div pixel) * pixel + 17), 3, 2);
+        TBomba.Create(((Hrac.GetX div pixel) * pixel + 17),
+        ((Hrac.GetY div pixel) * pixel + 17), 3, Hrac.BombRadius + Hrac.UpgradeRadius);
       //vytvorenie a nastavenie pozicie bomby s radiusom a casov vybuchnutia
-      Wall.Steny[(Hrac.Y div pixel) - 2][(Hrac.X div pixel) - 2].Typ := 2;
+      Wall.Steny[(Hrac.GetY div pixel) - 2][(Hrac.GetX div pixel) - 2].Typ := 2;
       //nastavime kosticku mapy ,ze je tam polozena bomba
     end;
   end;
-  if (not (Hrac.PohybujeSa) and not (Hrac.Zomrel) and (Key in KlavesnicePohybu)) then
-    //ak sa nepohybuje hrac , nezuomrel a stlacil klavesu pohybu
+  if (not (Hrac.Zomrel) and (Key in KlavesnicePohybu)) then
+    //ak sa nepohybuje hrac , nezomrel a stlacil klavesu pohybu sa posunie
   begin
     case Key of
       VK_UP: Hrac.Smer := 0; //smer hraca ktorym pojde
@@ -92,8 +120,8 @@ begin
       VK_LEFT: Hrac.Smer := 2;
       VK_RIGHT: Hrac.Smer := 3;
     end;
-    if (Hrac.OverPosun(Wall)) then
-      //overi posun hraca ci moze ist na danu kosticku ak je stlaceny jeden z klaves s ktorymi sa pohybuje
+    if (Hrac.OverPosun(Wall) and not (HracCas.Enabled)) then
+      //overi posun hraca ci moze ist na danu kosticku a nepohybuje sa
     begin
       Hrac.Faza := 32; //resetovanie fazy animovania
       Hrac.Opacne := False; //kolisanie a stupanie fazy pohybovania
@@ -109,26 +137,116 @@ begin
   if not (HraCas.Enabled) then //nech nerobi nic pokial nie je spustena hra
     exit;
   if ((Hrac.PohybujeSa) and (Key in KlavesnicePohybu)) then
-    //ak pustime klavesu pohybu skonci pohyb
+    //ak pustime klavesu pohybu
   begin
-    HracCas.Enabled := False;
-    Hrac.PohybujeSa := False;
+    if (((key = VK_UP) and (Hrac.Smer = 0)) or ((key = VK_DOWN) and (Hrac.Smer = 1)) or
+      ((key = VK_LEFT) and (Hrac.Smer = 2)) or ((key = VK_RIGHT) and
+      (Hrac.Smer = 3)))
+    then //overenie ci pustame tu klavesu ,ktorym smerom sa pohybuje hrac
+    begin
+      HracCas.Enabled := False; //skoncime pohyb
+      Hrac.PohybujeSa := False;
+    end;
   end;
+end;
+
+procedure TForm1.HighscoreClick(Sender: TObject);
+begin
+  HiSc.Show; //ukaze upgrade viac v upgradeform unit
 end;
 
 procedure TForm1.HraCasTimer(Sender: TObject);
 begin
-  VykresliInfo(HryObraz.Canvas, Hrac);
+  if Hrac.OverKoniec(Wall, Nepriatel) then //ak je na brane a na mape nie je ziadne npc
+  begin
+    HraCas.Enabled := False; //skonci vykreslovanie a vymaz premenne
+    HracCas.Enabled := False;
+    FreeAndNil(Wall);
+    FreeAndNil(Nepriatel);
+    Inc(Hrac.Level); //zvysenie levelu
+    if (Hrac.Level < length(level)) then //ak nepresiel vsetky urovne
+    begin
+      Hrac.ResetNextMap; //resetneme docastne upgrade-y a pridame skore za mapu
+      Nepriatel := TNepriatel.Create(); //nacitanie nepriatelov a mapy dalsieho levelu
+      Nepriatel.Nacitaj(level[Hrac.Level]);
+      Wall := TSteny.Create;
+      Wall.Nacitaj(level[Hrac.Level]);
+      HryObraz.Canvas.FillRect(Form1.ClientRect); //prefarbenie pozadia
+      HraCas.Enabled := True; //spustime hru
+      MenuPanel.Hide; //ukri menu
+      Upgrade.Hide; //ukri upgrade-y
+      exit; //skonci
+    end
+    else //ak presiel vsetky urovnia
+    begin
+      Resume.Hide; //zakryjeme tlacitko pokracovania
+      HryObraz.Canvas.Brush.Color := Form1.Color; //ukazeme si uvodny obrazok
+      HryObraz.Canvas.FillRect(Form1.ClientRect);
+      gui.LoadFromFile('img/logo.bmp');
+      gui.Transparent := True;
+      HryObraz.Canvas.Draw((HryObraz.Width div 2) - (gui.Width div 2), 15, gui);
+      //vykreslenie loga v menu
+      gui.Transparent := True;
+      gui.LoadFromFile('img/gui.bmp'); //nacitanie informacneho panelu pre hraca
+      MenuPanel.Show;
+      Hrac.Save; //ulozime profil (kvazi zablokujeme kedze sme presli hru)
+      FreeAndNil(Hrac);
+      ShowMessage('GRATULUJEME! Prešli ste hru!'); //oznamenie skoncenia celej hry
+      exit;  //skonci a dalej nechod
+    end;
+  end;
+  if ((Hrac.Zomrel) and (Hrac.Faza = 65) and (Hrac.Zivot > 0)) then
+    //ak zomrel a ma este zivoty resetni mapu
+  begin
+    HraCas.Enabled := False;
+    HracCas.Enabled := False;
+    FreeAndNil(Wall);
+    FreeAndNil(Nepriatel);
+    Hrac.resetMap; //resetne mapu (podrobnejsie priamo v procedure)
+    Nepriatel := TNepriatel.Create();  //znova vytvorenie nepriatelov a mapy
+    Nepriatel.Nacitaj(level[Hrac.Level]);
+    Wall := TSteny.Create;
+    Wall.Nacitaj(level[Hrac.Level]);
+    HryObraz.Canvas.FillRect(Form1.ClientRect); //prefarbenie pozadia
+    HraCas.Enabled := True; //spustime hru znova
+    exit;
+  end;
+  if ((Hrac.Zivot < 1) and (Hrac.Zomrel) and (Hrac.Faza = 65)) then
+    //ak zomrel a nema ziadne zivoty
+  begin
+    HraCas.Enabled := False; //skonci vsetky casovace uvolnime premenne
+    HracCas.Enabled := False;
+    FreeAndNil(Wall);
+    FreeAndNil(Nepriatel);
+    Hrac.Save; //ulozime profil aby sa nedalo pokracovat
+    Hrac.UlozSkore; //ulozime jeho highscore ak patri medzi top
+    FreeAndNil(Hrac);
+    Resume.Hide; //zakrytie pokracovania (tlacitko)
+    HryObraz.Canvas.Brush.Color := Form1.Color;
+    HryObraz.Canvas.FillRect(Form1.ClientRect);
+    gui.LoadFromFile('img/logo.bmp');
+    gui.Transparent := True;
+    HryObraz.Canvas.Draw((HryObraz.Width div 2) - (gui.Width div 2), 15, gui);
+    //vykreslenie loga v menu
+    gui.Transparent := True;
+    gui.LoadFromFile('img/gui.bmp'); //nacitanie informacneho panelu pre hraca
+    MenuPanel.Show;
+    ShowMessage('Prehrali ste!'); //oznam o prehre
+    exit; //skonci v timeri
+  end;
+  //ak nezomrel, nepostupil ....
+  VykresliInfo(HryObraz.Canvas, Hrac);  //vykreslenie informacneho panelu
   Wall.Vykresli(HryObraz.Canvas); //vykreslenie mapy stien a cesty
-  if (length(Nepriatel.NPC) > 0) then  //ak je nejaky nepriatel tak vykresli ich
+  if ((Hrac.Bomby <> nil) or (length(Hrac.Bomby) > 0)) then  //ak je polozena bomba
+    Hrac.VykresliBombu(HryObraz.Canvas, Wall);    //vykreslenie bomby ci vybuchov
+  if ((Nepriatel <> nil) or (length(Nepriatel.NPC) > 0)) then
+    //ak je nejaky nepriatel tak vykresli ich
   begin
     Nepriatel.Casovac;
     //s podprocedurami na vybranie nahodneho smeru, fazy animacie, posunutie na mape ...
     Nepriatel.Vykresli(HryObraz.Canvas, Wall); //vykreslenie nepriatelov
-    Inc(Hrac.Skore, Nepriatel.VratSkore);
+    Inc(Hrac.LevelSkore, Nepriatel.VratSkore); //priradenie skore zabitych npc
   end;
-  if ((Hrac.Bomby <> nil) or (length(Hrac.Bomby) > 0)) then  //ak je polozena bomba
-    Hrac.VykresliBombu(HryObraz.Canvas, Wall);    //vykreslenie bomby ci vybuchov
   Hrac.Vykresli(HryObraz.Canvas, Wall, Nepriatel, HracCas); //vykreslenie hraca
 end;
 
@@ -136,7 +254,10 @@ procedure TForm1.HracCasTimer(Sender: TObject);
 begin
   if Hrac.OverPosun(Wall) then
     //overenie ci sa moze pohnut a nema ziadnu prekazku pred sebou
-    Hrac.Posun(Hrac.Smer) //meni poziciu hraca podla orientacie pohybu
+  begin
+    Hrac.Posun(Hrac.Smer); //meni poziciu hraca podla orientacie pohybu
+    Hrac.OverUpgrade(Wall); //overi ci nevstupil na upgrade
+  end
   else
   begin
     HracCas.Enabled := False;  //ak ma prekazku prestan sa pohybovat
@@ -144,19 +265,69 @@ begin
   end;
 end;
 
-procedure TForm1.NewGameClick(Sender: TObject);
+procedure TForm1.NacitajClick(Sender: TObject);
+var
+  profil: string;
 begin
-  HryObraz.Canvas.Brush.Style := bsSolid;
-  HryObraz.Canvas.FillRect(Form1.ClientRect); //prefarbenie pozadia
-  HryObraz.Canvas.Brush.Style := bsClear;
-  Wall := TSteny.Create;
-  Wall.Nacitaj('level', HryObraz.Height, HryObraz.Width); //nacitanie mpay z LEVEL(.txt)
-  Hrac := TPlayer.Create(3 * pixel + 17, 3 * pixel + 17);
-  //vytvorenie hraca s pociatocnym x a y
-  Nepriatel := TNepriatel.Create();
-  Nepriatel.Nacitaj('level'); //nacitanie nepriatelov z LEVEL(.txt)
-  HraCas.Enabled := True; //spustime hru
-  MenuPanel.Hide; //ukri menu
+  if InputQuery('Výber profilu', 'Napíšte názov profilu', profil) then
+    //vyber profilu
+    if fileexists('profil/' + profil + '.dat') then //ak ten profil existuje nacitaj hru
+    begin
+      FreeAndNil(Hrac); //istota uvolnenia premennych
+      FreeAndNil(Wall);
+      FreeAndNil(Nepriatel);
+      Hrac := TPlayer.Create(profil);
+      Hrac.Load(profil); //nacita profil zo suboru
+      if ((Hrac.Level >= length(level)) or (Hrac.Zivot < 1)) then
+        //ak uz presiel ci uz nema zivoty
+      begin
+        FreeAndNil(Hrac);
+        ShowMessage('Tento profil už prešiel hru, alebo ste ju neprešli!');
+        exit; //vypise ze uz ste prehrali ci vyhrali a skonci cely proces
+      end;
+      //ak neprehral ci nevyhral nacita mapu a zacne sa hra
+      Nepriatel := TNepriatel.Create();
+      Nepriatel.Nacitaj(level[Hrac.Level]); //nacitanie nepriatelov
+      Wall := TSteny.Create;
+      Wall.Nacitaj(level[Hrac.Level]);
+      HryObraz.Canvas.FillRect(Form1.ClientRect); //prefarbenie pozadia
+      HraCas.Enabled := True; //spustime hru
+      MenuPanel.Hide; //ukri menu
+      Upgrade.Hide;
+    end
+    else //ak nenasiel profil oznami to a nic neurobi
+      ShowMessage('Profil sa nenašiel!');
+end;
+
+procedure TForm1.NastaveniaClick(Sender: TObject);
+begin
+  //volby obtiaznosti 4. etapa
+end;
+
+procedure TForm1.NewGameClick(Sender: TObject);
+var
+  profil: string;
+begin
+  if InputQuery('Názov profilu', 'Napíšte názov profilu', profil) then
+    if (profil <> '') then //ak ste zadali nejake meno vytvori profil
+    begin
+      FreeAndNil(Wall); //istota
+      FreeAndNil(Nepriatel);
+      FreeAndNil(Hrac);
+      HryObraz.Canvas.FillRect(Form1.ClientRect); //prefarbenie pozadia
+      Hrac := TPlayer.Create(profil);
+      //vytvorenie hraca s pociatocnym x a y
+      Wall := TSteny.Create;
+      Wall.Nacitaj(level[Hrac.Level]);
+      Nepriatel := TNepriatel.Create();
+      Nepriatel.Nacitaj(level[Hrac.Level]); //nacitanie nepriatelov zo suboru
+      HraCas.Enabled := True; //spustime hru
+      MenuPanel.Hide; //ukri menu
+      Hrac.Save; //ulozime profil s pociatocnymi informaciami o hracovi
+      Upgrade.Hide;
+    end
+    else
+      ShowMessage('Nepodarilo sa vytvoriť profil!'); //ak sa nenapisal nazov profilu
 end;
 
 procedure TForm1.QuitClick(Sender: TObject);
@@ -164,20 +335,56 @@ begin
   Close; //vyjde z hry
 end;
 
+procedure TForm1.ResumeClick(Sender: TObject);
+begin
+  if (Hrac <> nil) then //osetrenie aby to nespustalo ked nie je nacitany profil
+  begin
+    MenuPanel.Hide; //zajryjeme uvodnu obrazovku a spustime hru
+    Upgrade.Hide;
+    HryObraz.Canvas.Brush.Color := Form1.Color;
+    HryObraz.Canvas.FillRect(Form1.ClientRect);
+    HraCas.Enabled := True;
+  end;
+end;
+
+procedure TForm1.UpgradeButClick(Sender: TObject);
+begin
+  if (Hrac <> nil) then //ak je nacitany nejaky profil
+  begin
+    Upgrade.Vytvor(@Hrac);
+    //posleme pointer hraca do upgrade unitu kedze cez priradenie by neslo...
+    Upgrade.Show; //ukazeme upgrade
+  end;
+end;
+
+procedure TForm1.UlozClick(Sender: TObject);
+begin
+  if (Hrac <> nil) then //ak je nejaky profil nacitany
+  begin
+    Hrac.Save; //uloz ho a oznam to
+    ShowMessage('Uložené');
+  end;
+end;
+
 procedure TForm1.VykresliInfo(Obraz: TCanvas; Informacie: TPlayer);
 begin
   HryObraz.Canvas.Draw(831, 66, gui); //vykreslime informacny panel hraca
+  Obraz.Brush.Style := bsClear;
   Obraz.TextOut(915, 85, 'x ' + IntToStr(Informacie.Zivot));
   //nastavujeme poziciu kde sa bude zobrazovat informacia o zivote
-  Obraz.TextOut(865, 125, format('%.6d', [Informacie.Skore]));
+  Obraz.TextOut(865, 125, format('%.6d', [Informacie.Skore + Informacie.LevelSkore]));
   //to iste iba skore sa bude zobrazovat vo formate 001000
-  Obraz.TextOut(895, 190, IntToStr(Length(Informacie.Bomby)) +
-    ' / ' + IntToStr(Informacie.PocetBomb)); //pocet bomb na zemi z kolkatich
+  Obraz.TextOut(895, 190, IntToStr(Length(Informacie.Bomby)) + ' / ' +
+    IntToStr(Informacie.PocetBomb + Informacie.UpgradePocetBomb));
+  //zobrazi informacie ze kolko ma polozenych bomb z povolenych
+  Obraz.TextOut(870, 240, 'Level ' + IntToStr(Informacie.Level + 1));
+  //info ,ktory je to level
   Obraz.Font.Size := 9; //mensie upravy fontu na vykreslovanie slova 'Skore'
   Obraz.Font.Bold := False;
   Obraz.TextOut(895, 154, 'Skóre');
   Obraz.Font.Bold := True;
   Obraz.Font.Size := 18;
+  Obraz.Brush.Style := bsSolid;
 end;
 
 end.

@@ -1,0 +1,48 @@
+object HiSc: THiSc
+  Left = 480
+  Height = 540
+  Top = 100
+  Width = 721
+  Caption = 'Highscore'
+  ClientHeight = 540
+  ClientWidth = 721
+  Color = 11429457
+  OnCreate = FormCreate
+  OnShow = FormShow
+  LCLVersion = '0.9.31'
+  object CloseHS: TButton
+    Left = 320
+    Height = 25
+    Top = 449
+    Width = 75
+    Caption = 'Zavrieť'
+    OnClick = CloseHSClick
+    TabOrder = 0
+  end
+  object HS: TStringGrid
+    Left = 160
+    Height = 384
+    Top = 48
+    Width = 400
+    Anchors = [akTop]
+    AutoEdit = False
+    BorderStyle = bsNone
+    Color = 6830609
+    ColCount = 2
+    DefaultColWidth = 200
+    Enabled = False
+    FixedColor = 4210688
+    FixedCols = 0
+    Font.Color = clWhite
+    HeaderHotZones = []
+    HeaderPushZones = []
+    Options = [goVertLine, goSmoothScroll]
+    ParentFont = False
+    RowCount = 1
+    ScrollBars = ssNone
+    TabOrder = 1
+    TitleFont.Color = clWhite
+    TitleFont.Style = [fsBold]
+    TitleStyle = tsStandard
+  end
+end
