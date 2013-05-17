@@ -156,8 +156,6 @@ begin
 end;
 
 procedure TForm1.HraCasTimer(Sender: TObject);
-var
-  X, Y: integer;
 begin
   if Hrac.OverKoniec(Wall, Nepriatel) then //ak je na brane a na mape nie je ziadne npc
   begin

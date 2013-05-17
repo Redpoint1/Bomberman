@@ -21,10 +21,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="zaklad"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="325"/>
-        <CursorPos X="32" Y="360"/>
+        <TopLine Value="144"/>
+        <CursorPos X="47" Y="158"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -81,11 +82,10 @@
         <Filename Value="share.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="share"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
         <TopLine Value="7"/>
-        <CursorPos X="42" Y="24"/>
+        <CursorPos X="11" Y="19"/>
         <UsageCount Value="86"/>
         <Loaded Value="True"/>
       </Unit6>
