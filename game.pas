@@ -112,8 +112,8 @@ begin
             SetLength(Steny[high(Steny)], Length(Steny[high(Steny)]) + 1);
             //zvysenie pola policok mapy
             Steny[high(Steny)][high(Steny[high(Steny)])] :=
-              TStena.Create(high(Steny[high(Steny)]) * pixel +
-              17 + 2 * pixel, high(Steny) * pixel + 17 + 2 * pixel, t);
+              TStena.Create(high(Steny[high(Steny)]) * pixel + 17,
+              high(Steny) * pixel + 17, t);
             //vytvorenie s poziciami
           end;
         until Length(Steny[high(Steny)]) = X;

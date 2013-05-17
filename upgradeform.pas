@@ -66,8 +66,8 @@ begin
     Hrac^.Speed := Hrac^.Speed + 0.05; //zvysime rychlost
     Dec(Hrac^.Skore, UpgradeCost[2]); //znizime skore
     vykresliInfo; //to iste ako u radius
-    ShowMessage('Rýchlosť je: +' + IntToStr(Round(
-      (Hrac^.Speed - StartSpeed) * 100)) + '%');
+    ShowMessage('Rýchlosť je: +' +
+      IntToStr(Round((Hrac^.Speed - StartSpeed) * 100)) + '%');
     //o kolko % mame zvysenu rychlost od povodnej
   end
   else

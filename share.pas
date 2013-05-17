@@ -36,7 +36,7 @@ const //zdielane konstanty v hre
   StartLevel: integer = 0;
   StartRadius: integer = 1;
   PovoleneBloky = [0, 2];
-  SpawnSuradnice = 116; //spawnovaci pixel (prve volne policko od laveho horneho rohu)
+  SpawnSuradnice = 50; //spawnovaci pixel (prve volne policko od laveho horneho rohu)
   //povolene bloky ,cez ktore moze hrac prechadzat (volne policko a bomba)
   ZnicitelneBloky = [2, 4]; //ktore bloky moze nicit
 

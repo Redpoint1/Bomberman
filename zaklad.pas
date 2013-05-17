@@ -46,7 +46,8 @@ var
   Hrac: TPlayer;  //objekt hraca
   Wall: TSteny;   // objekty mapy ,teda stien
   Nepriatel: TNepriatel;   //objekty nepriatelov
-  Gui: TBitmap; // pomocna bitmapa (logo, informacna tabulka pocat hry)
+  Gui, TempMapa, PartMapa: TBitmap;
+// pomocna bitmapa (logo, informacna tabulka pocat hry)
 
 implementation
 
@@ -97,9 +98,8 @@ begin
     length(Hrac.Bomby)) and not (Hrac.Zomrel)) then
     //ak stlacime medzernik a hrac nie je mrtvy polozi bombu
   begin
-    if ((Wall.Steny[(Hrac.GetY div pixel) - 2][(Hrac.GetX div pixel) - 2].Typ <> 2) and
-      (Wall.Steny[(Hrac.GetY div pixel) - 2][(Hrac.GetX div pixel) -
-      2].Upgrade < 0)) then
+    if ((Wall.Steny[(Hrac.GetY div pixel)][(Hrac.GetX div pixel)].Typ <> 2) and
+      (Wall.Steny[(Hrac.GetY div pixel)][(Hrac.GetX div pixel)].Upgrade < 0)) then
       //overenie ci na danej kosticke nie je uz bomba
     begin
       setlength(Hrac.Bomby, length(Hrac.Bomby) + 1);
@@ -107,7 +107,7 @@ begin
         TBomba.Create(((Hrac.GetX div pixel) * pixel + 17),
         ((Hrac.GetY div pixel) * pixel + 17), 3, Hrac.BombRadius + Hrac.UpgradeRadius);
       //vytvorenie a nastavenie pozicie bomby s radiusom a casov vybuchnutia
-      Wall.Steny[(Hrac.GetY div pixel) - 2][(Hrac.GetX div pixel) - 2].Typ := 2;
+      Wall.Steny[(Hrac.GetY div pixel)][(Hrac.GetX div pixel)].Typ := 2;
       //nastavime kosticku mapy ,ze je tam polozena bomba
     end;
   end;
@@ -156,6 +156,8 @@ begin
 end;
 
 procedure TForm1.HraCasTimer(Sender: TObject);
+var
+  X, Y: integer;
 begin
   if Hrac.OverKoniec(Wall, Nepriatel) then //ak je na brane a na mape nie je ziadne npc
   begin
@@ -236,18 +238,32 @@ begin
   end;
   //ak nezomrel, nepostupil ....
   VykresliInfo(HryObraz.Canvas, Hrac);  //vykreslenie informacneho panelu
-  Wall.Vykresli(HryObraz.Canvas); //vykreslenie mapy stien a cesty
+  Wall.Vykresli(TempMapa.Canvas); //vykreslenie mapy stien a cesty
   if ((Hrac.Bomby <> nil) or (length(Hrac.Bomby) > 0)) then  //ak je polozena bomba
-    Hrac.VykresliBombu(HryObraz.Canvas, Wall);    //vykreslenie bomby ci vybuchov
+    Hrac.VykresliBombu(TempMapa.Canvas, Wall);    //vykreslenie bomby ci vybuchov
   if ((Nepriatel <> nil) or (length(Nepriatel.NPC) > 0)) then
     //ak je nejaky nepriatel tak vykresli ich
   begin
     Nepriatel.Casovac;
     //s podprocedurami na vybranie nahodneho smeru, fazy animacie, posunutie na mape ...
-    Nepriatel.Vykresli(HryObraz.Canvas, Wall); //vykreslenie nepriatelov
+    Nepriatel.Vykresli(TempMapa.Canvas, Wall); //vykreslenie nepriatelov
     Inc(Hrac.LevelSkore, Nepriatel.VratSkore); //priradenie skore zabitych npc
   end;
-  Hrac.Vykresli(HryObraz.Canvas, Wall, Nepriatel, HracCas); //vykreslenie hraca
+  Hrac.Vykresli(TempMapa.Canvas, Wall, Nepriatel, HracCas); //vykreslenie hraca
+  if ((length(Wall.Steny) <= 15) and (length(Wall.Steny[low(Wall.Steny)]) <= 23)) then
+    HryObraz.Canvas.Draw(66 + (759 - length(Wall.Steny[low(Wall.Steny)]) * pixel) div
+      2, 66 + (495 - length(Wall.Steny) * pixel) div 2, TempMapa)
+  else
+  begin
+    if ((Hrac.GetX > PartMapa.Width div 2) and
+      (Hrac.GetX < TempMapa.Width - PartMapa.Width div 2)) then
+      Hrac.PosunX := Hrac.GetX - PartMapa.Width div 2;
+    if (Hrac.GetY > PartMapa.Height div 2) and
+      (Hrac.GetY < TempMapa.Height - PartMapa.Height div 2) then
+      Hrac.PosunY := Hrac.GetY - PartMapa.Height div 2;
+    PartMapa.Canvas.Draw(-Hrac.PosunX, -Hrac.PosunY, TempMapa);
+    HryObraz.Canvas.Draw(66, 66, PartMapa);
+  end;
 end;
 
 procedure TForm1.HracCasTimer(Sender: TObject);
@@ -276,6 +292,8 @@ begin
       FreeAndNil(Hrac); //istota uvolnenia premennych
       FreeAndNil(Wall);
       FreeAndNil(Nepriatel);
+      FreeAndNil(TempMapa);
+      FreeAndNil(PartMapa);
       Hrac := TPlayer.Create(profil);
       Hrac.Load(profil); //nacita profil zo suboru
       if ((Hrac.Level >= length(level)) or (Hrac.Zivot < 1)) then
@@ -290,6 +308,15 @@ begin
       Nepriatel.Nacitaj(level[Hrac.Level]); //nacitanie nepriatelov
       Wall := TSteny.Create;
       Wall.Nacitaj(level[Hrac.Level]);
+      TempMapa := TBitMap.Create;
+      TempMapa.Width := length(Wall.Steny[low(Wall.Steny)]) * pixel;
+      TempMapa.Height := length(Wall.Steny) * pixel;
+      if ((length(Wall.Steny) > 15) or (length(Wall.Steny[low(Wall.Steny)]) > 23)) then
+      begin
+        PartMapa := TBitmap.Create;
+        PartMapa.Width := 759;
+        PartMapa.Height := 495;
+      end;
       HryObraz.Canvas.FillRect(Form1.ClientRect); //prefarbenie pozadia
       HraCas.Enabled := True; //spustime hru
       MenuPanel.Hide; //ukri menu
@@ -314,13 +341,24 @@ begin
       FreeAndNil(Wall); //istota
       FreeAndNil(Nepriatel);
       FreeAndNil(Hrac);
+      FreeAndNil(TempMapa);
+      FreeAndNil(PartMapa);
       HryObraz.Canvas.FillRect(Form1.ClientRect); //prefarbenie pozadia
       Hrac := TPlayer.Create(profil);
       //vytvorenie hraca s pociatocnym x a y
       Wall := TSteny.Create;
       Wall.Nacitaj(level[Hrac.Level]);
-      Nepriatel := TNepriatel.Create();
+      Nepriatel := TNepriatel.Create;
       Nepriatel.Nacitaj(level[Hrac.Level]); //nacitanie nepriatelov zo suboru
+      TempMapa := TBitMap.Create;
+      TempMapa.Width := length(Wall.Steny[low(Wall.Steny)]) * pixel;
+      TempMapa.Height := length(Wall.Steny) * pixel;
+      if ((length(Wall.Steny) > 15) or (length(Wall.Steny[low(Wall.Steny)]) > 23)) then
+      begin
+        PartMapa := TBitmap.Create;
+        PartMapa.Width := 759;
+        PartMapa.Height := 495;
+      end;
       HraCas.Enabled := True; //spustime hru
       MenuPanel.Hide; //ukri menu
       Hrac.Save; //ulozime profil s pociatocnymi informaciami o hracovi

@@ -61,7 +61,8 @@ begin
   j := 0;    //zmazeme zaniknutych nepriatelov a skracujeme pole nepriatelov
   for i := 0 to length(NPC) - 1 do
     if ((NPC[i] <> nil) and (((NPC[i].Zomrel) and (NPC[i].Sekunda > 0)) or not
-      (NPC[i].Zomrel))) then  //ak nie je nil a zaroven zomrel ,ale beha animacka ,alebo nezomrel
+      (NPC[i].Zomrel))) then
+      //ak nie je nil a zaroven zomrel ,ale beha animacka ,alebo nezomrel
     begin
       NPC[j] := NPC[i];
       Inc(j);
@@ -208,7 +209,7 @@ var
 begin
   for i := 0 to length(NPC) - 1 do
     //pre vsetkych nepriatelov overi ci nezabilo ich vybuch
-    if ((Okolie.Steny[NPC[i].GetY div pixel - 2][NPC[i].GetX div pixel - 2].Typ = 3) and
+    if ((Okolie.Steny[NPC[i].GetY div pixel][NPC[i].GetX div pixel].Typ = 3) and
       not (NPC[i].Zomrel)) then
     begin
       NPC[i].Zomrel := True;  //ak ano tak zomrel
@@ -222,12 +223,14 @@ var
   Sub: TFileStream;
   X, Y, Typ: integer;
 begin
-  if fileexists('mapy/'+S + '.dat') then //overenie ci existuje ten subor
+  if fileexists('mapy/' + S + '.dat') then //overenie ci existuje ten subor
   begin
-    Sub := TFileStream.Create('mapy/' + S + '.dat', fmOpenRead); //zadefinujeme a otvorime subor
+    Sub := TFileStream.Create('mapy/' + S + '.dat', fmOpenRead);
+    //zadefinujeme a otvorime subor
     Sub.ReadBuffer(Y, 4);
     Sub.ReadBuffer(X, 4);
-    Sub.Position := (X * Y + 3) * 4; //preskocime na poziciu kde zacinaju informacie o nepriateloch na mape
+    Sub.Position := (X * Y + 3) * 4;
+    //preskocime na poziciu kde zacinaju informacie o nepriateloch na mape
     if (Sub.Size > Sub.Position) then //ak nejaky su
     begin
       repeat
@@ -235,7 +238,8 @@ begin
         Sub.ReadBuffer(Y, 4);
         Sub.ReadBuffer(Typ, 4);
         Pridaj(X, Y, Typ);
-      until Sub.Position = Sub.Size;  //nacitavame nepriatelov pokial nie je koniec suboru
+      until Sub.Position = Sub.Size;
+      //nacitavame nepriatelov pokial nie je koniec suboru
     end;
     Sub.Free; //zatvorime subor
   end;
@@ -263,37 +267,37 @@ begin
     0: Result := True; //ak stoji tak nema ziadnu barieru kam by nemohol ist
     1: //hore
     begin
-      if ((Komu.GetY div pixel - 1 - 2) < 0) then   //ak by chcel ist za okraje mapy
+      if ((Komu.GetY div pixel - 1) < 0) then   //ak by chcel ist za okraje mapy
         exit;
-      if (Okolie.Steny[Komu.GetY div pixel - 1 - 2][Komu.GetX div
-        pixel - 2].Typ in NpcBloky[Komu.Typ]) then
+      if (Okolie.Steny[Komu.GetY div pixel - 1][Komu.GetX div pixel].Typ in
+        NpcBloky[Komu.Typ]) then
         //ak moze ist do urcite typu policka
         Result := True;
     end;
     //opakuje sa
     2:  //dole
     begin
-      if ((Komu.GetY div pixel + 1 - 2) > Length(Okolie.Steny) - 1) then
+      if ((Komu.GetY div pixel + 1) > Length(Okolie.Steny) - 1) then
         exit;
-      if (Okolie.Steny[Komu.GetY div pixel + 1 - 2][Komu.GetX div
-        pixel - 2].Typ in NpcBloky[Komu.Typ]) then
+      if (Okolie.Steny[Komu.GetY div pixel + 1][Komu.GetX div pixel].Typ in
+        NpcBloky[Komu.Typ]) then
         Result := True;
     end;
     3: //doprava
     begin
-      if ((Komu.GetX div pixel - 1 - 2) < 0) then
+      if ((Komu.GetX div pixel - 1) < 0) then
         exit;
-      if (Okolie.Steny[Komu.GetY div pixel - 2][Komu.GetX div pixel -
-        1 - 2].Typ in NpcBloky[Komu.Typ]) then
+      if (Okolie.Steny[Komu.GetY div pixel][Komu.GetX div pixel - 1].Typ in
+        NpcBloky[Komu.Typ]) then
         Result := True;
     end;
     4:  //dolava
     begin
-      if ((Komu.GetX div pixel + 1 - 2) >
-        Length(Okolie.Steny[Komu.GetY div pixel - 2]) - 1) then
+      if ((Komu.GetX div pixel + 1) >
+        Length(Okolie.Steny[Komu.GetY div pixel]) - 1) then
         exit;
-      if (Okolie.Steny[Komu.GetY div pixel - 2][Komu.GetX div pixel +
-        1 - 2].Typ in NpcBloky[Komu.Typ]) then
+      if (Okolie.Steny[Komu.GetY div pixel][Komu.GetX div pixel + 1].Typ in
+        NpcBloky[Komu.Typ]) then
         Result := True;
     end;
   end;
@@ -304,8 +308,8 @@ end;
 constructor TNpc.Create(XX, YY, TypNPC: integer);
 begin
   Zomrel := False;
-  X := (XX + 1) * pixel + 17;  //pridavame nepriatelov do policok
-  Y := (YY + 1) * pixel + 17;
+  X := (XX - 1) * pixel + 17;  //pridavame nepriatelov do policok
+  Y := (YY - 1) * pixel + 17;
   Typ := TypNPC; //aky typ npc to je
   Smer := 0; //defaulny smer statia
   PohybujeSa := False; //nepohybuje sa

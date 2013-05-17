@@ -28,7 +28,7 @@ type
   TPlayer = class
     Nick: string;
     Zivot, Smer, Faza, Skore, PocetBomb, UpgradePocetBomb, UpgradeRadius,
-    BombRadius, Level, LevelSkore: integer;
+    BombRadius, Level, LevelSkore, PosunX, PosunY: integer;
     //snad z nazvovo premennych pochopitelne iba tie s Upgrade* su docastne upgrade-y na mapu
     X, Y, UpgradeSpeed, Speed: real;
     //pozicia hraca, docasne zvysenie rychlosti na mapu a rychlost hraca
@@ -103,8 +103,8 @@ begin
     if (Walle.Steny[PosY][PosX].Typ = 2) then //ak je to bomba
     begin
       for i := 0 to high(bombs) do //vyhladame tu bombu
-        if ((bombs[i].X = (((PosX + 2) * pixel + 17))) and
-          (bombs[i].Y = ((PosY + 2) * pixel + 17))) then //ak je to ta bomba
+        if ((bombs[i].X = (((PosX) * pixel + 17))) and
+          (bombs[i].Y = ((PosY) * pixel + 17))) then //ak je to ta bomba
         begin
           bombs[i].Sekund := 0; //nastavime cas vybuchu
           Result := False; //skonci pokracovanie vybuchu
@@ -226,26 +226,26 @@ begin
       Obr.Draw(Bomby[j].x - 17, Bomby[j].y - 17, BombyObr[Bomby[j].Faza])
     else   //inac vybuchne bomba
     begin
-      Walli.Steny[Bomby[j].y div pixel - 2][Bomby[j].x div pixel - 2].Typ := 0;
+      Walli.Steny[Bomby[j].y div pixel][Bomby[j].x div pixel].Typ := 0;
       //zmena policka mapy
       for i := (Bomby[j].x div pixel) downto (Bomby[j].x div pixel - Bomby[j].radius) do
         //nastavi policka na vybuchnutie
         //dolava
       begin
-        if (Bomby[j].OverStenu(Walli, Bomby, Bomby[j].y div pixel - 2, i - 2, 2)) then
+        if (Bomby[j].OverStenu(Walli, Bomby, Bomby[j].y div pixel, i, 2)) then
           //overuje ci nie je stena
         begin
           if ((i = (Bomby[j].x div pixel - Bomby[j].radius)) and
-            (Walli.Steny[Bomby[j].y div pixel - 2][i - 2].Faza = 501)) then
+            (Walli.Steny[Bomby[j].y div pixel][i].Faza = 501)) then
             //ukoncuje vybuch
           begin
-            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].Obraz := Walli.BombyObr[0][0];
+            Walli.Steny[Bomby[j].y div pixel][i].Obraz := Walli.BombyObr[0][0];
             //nastavi obrazok policka mapy na vybuch
-            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].BombaSmer := 0;
+            Walli.Steny[Bomby[j].y div pixel][i].BombaSmer := 0;
             //nastavi smer bomby
           end
           else if (i = (Bomby[j].x div pixel - Bomby[j].radius)) then
-            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].Faza := 500;
+            Walli.Steny[Bomby[j].y div pixel][i].Faza := 500;
         end
         else   //ak najde stenu  tak zrus rozsirenie vybuchu
         begin
@@ -256,16 +256,16 @@ begin
       for i := (Bomby[j].x div pixel) to (Bomby[j].x div pixel + Bomby[j].radius) do
         //doprava
       begin
-        if (Bomby[j].OverStenu(Walli, Bomby, Bomby[j].y div pixel - 2, i - 2, 3)) then
+        if (Bomby[j].OverStenu(Walli, Bomby, Bomby[j].y div pixel, i, 3)) then
         begin
           if ((i = (Bomby[j].x div pixel + Bomby[j].radius)) and
-            (Walli.Steny[Bomby[j].y div pixel - 2][i - 2].Faza = 501)) then
+            (Walli.Steny[Bomby[j].y div pixel][i].Faza = 501)) then
           begin
-            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].Obraz := Walli.BombyObr[0][3];
-            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].BombaSmer := 3;
+            Walli.Steny[Bomby[j].y div pixel][i].Obraz := Walli.BombyObr[0][3];
+            Walli.Steny[Bomby[j].y div pixel][i].BombaSmer := 3;
           end
           else
-            Walli.Steny[Bomby[j].y div pixel - 2][i - 2].Faza := 500;
+            Walli.Steny[Bomby[j].y div pixel][i].Faza := 500;
         end
         else
         begin
@@ -275,16 +275,16 @@ begin
       for i := (Bomby[j].y div pixel) to (Bomby[j].y div pixel + Bomby[j].radius) do
         //dole
       begin
-        if (Bomby[j].OverStenu(Walli, Bomby, i - 2, Bomby[j].x div pixel - 2, 1)) then
+        if (Bomby[j].OverStenu(Walli, Bomby, i, Bomby[j].x div pixel, 1)) then
         begin
           if ((i = (Bomby[j].y div pixel + Bomby[j].radius)) and
-            (Walli.Steny[i - 2][Bomby[j].x div pixel - 2].Faza = 501)) then
+            (Walli.Steny[i][Bomby[j].x div pixel].Faza = 501)) then
           begin
-            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].Obraz := Walli.BombyObr[0][6];
-            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].BombaSmer := 6;
+            Walli.Steny[i][Bomby[j].x div pixel].Obraz := Walli.BombyObr[0][6];
+            Walli.Steny[i][Bomby[j].x div pixel].BombaSmer := 6;
           end
           else
-            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].Faza := 500;
+            Walli.Steny[i][Bomby[j].x div pixel].Faza := 500;
         end
         else
         begin
@@ -294,25 +294,25 @@ begin
       for i := (Bomby[j].y div pixel) downto (Bomby[j].y div pixel - Bomby[j].radius) do
         //hore
       begin
-        if (Bomby[j].OverStenu(Walli, Bomby, i - 2, Bomby[j].x div pixel - 2, 0)) then
+        if (Bomby[j].OverStenu(Walli, Bomby, i, Bomby[j].x div pixel, 0)) then
         begin
           if ((i = (Bomby[j].y div pixel - Bomby[j].radius)) and
-            (Walli.Steny[i - 2][Bomby[j].x div pixel - 2].Faza = 501)) then
+            (Walli.Steny[i][Bomby[j].x div pixel].Faza = 501)) then
           begin
-            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].Obraz := Walli.BombyObr[0][5];
-            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].BombaSmer := 5;
+            Walli.Steny[i][Bomby[j].x div pixel].Obraz := Walli.BombyObr[0][5];
+            Walli.Steny[i][Bomby[j].x div pixel].BombaSmer := 5;
           end
           else
-            Walli.Steny[i - 2][Bomby[j].x div pixel - 2].Faza := 500;
+            Walli.Steny[i][Bomby[j].x div pixel].Faza := 500;
         end
         else
         begin
           break;
         end;
       end;
-      Walli.Steny[Bomby[j].y div pixel - 2][Bomby[j].x div pixel - 2].Obraz :=
+      Walli.Steny[Bomby[j].y div pixel][Bomby[j].x div pixel].Obraz :=
         Walli.BombyObr[0][2];
-      Walli.Steny[Bomby[j].y div pixel - 2][Bomby[j].x div pixel - 2].BombaSmer := 2;
+      Walli.Steny[Bomby[j].y div pixel][Bomby[j].x div pixel].BombaSmer := 2;
     end;
   end;
   ZmazBomby; //zmaze vybuchnute bomby
@@ -346,10 +346,10 @@ end;
 
 procedure TPlayer.OverUpgrade(Okolie: TSteny);
 begin
-  if (Okolie.Steny[GetY div 33 - 2][GetX div 33 - 2].Upgrade >= 0) then
+  if (Okolie.Steny[GetY div pixel][GetX div pixel].Upgrade >= 0) then
     //ak na policku je upgrade
   begin
-    case (Okolie.Steny[GetY div 33 - 2][GetX div 33 - 2].Upgrade) of
+    case (Okolie.Steny[GetY div pixel][GetX div pixel].Upgrade) of
       //podla typu upgradeu zvys hodnoty (ak neprekracuje maximum povoleny upgrade)
       0: if ((PocetBomb + UpgradePocetBomb) < MaxPocetBomb) then
           Inc(UpgradePocetBomb);
@@ -359,12 +359,12 @@ begin
           UpgradeSpeed := UpgradeSpeed + UpgradeSpeedHodnota;
       3: Inc(Zivot);
     end;
-    if (Okolie.Steny[GetY div 33 - 2][GetX div 33 - 2].Upgrade <> Brana) then
+    if (Okolie.Steny[GetY div pixel][GetX div pixel].Upgrade <> Brana) then
       //ak ten upgrade nie je id brany
     begin
-      Okolie.Steny[GetY div 33 - 2][GetX div 33 - 2].Upgrade := -1;
+      Okolie.Steny[GetY div pixel][GetX div pixel].Upgrade := -1;
       //zmaz upgrade policka
-      Okolie.Steny[GetY div 33 - 2][GetX div 33 - 2].Obraz := Okolie.StenyObr[0];
+      Okolie.Steny[GetY div pixel][GetX div pixel].Obraz := Okolie.StenyObr[0];
       //hod obrazok volneho policka
     end;
   end;
@@ -412,17 +412,17 @@ var
   S: TFileStream;
   PocetSkore: TPoleSkore;
   Pom: RSkore;
-  i, j : integer;
+  i, j: integer;
 begin
   setlength(PocetSkore, 0); //inicializovanie
   if fileexists('skore.dat') then //ak existuje uz ulozene skore
   begin
     S := TFileStream.Create('skore.dat', fmOpenReadWrite);
     if (S.Size > 0) then
-    repeat
-      setlength(PocetSkore, length(PocetSkore) + 1); //zvysime pole a precitame zo suboru
-      S.ReadBuffer(PocetSkore[high(PocetSkore)], sizeOf(RSkore));
-    until (S.Position = S.Size); //pokial neprideme na koniec
+      repeat
+        setlength(PocetSkore, length(PocetSkore) + 1); //zvysime pole a precitame zo suboru
+        S.ReadBuffer(PocetSkore[high(PocetSkore)], sizeOf(RSkore));
+      until (S.Position = S.Size); //pokial neprideme na koniec
     setlength(PocetSkore, length(PocetSkore) + 1);
     //pridame terajsieho hraca co skoncil hru
     PocetSkore[high(pocetSkore)].body := skore;
@@ -431,7 +431,7 @@ begin
     //pretriedime (najvysieho po najnizsie skore, ak rovnake skore tak ,ktory ho dosiahol skorej je vysie)
     S.Size := 0; //rewrirte suboru
     if (length(pocetskore) <= 10) then //nech nemame viac ako 10 ludi v highscore
-      j := length(pocetskore)-1
+      j := length(pocetskore) - 1
     else
       j := 10;
     for i := 0 to j do //zapiseme utriedene pole
@@ -490,54 +490,54 @@ begin
   case Smer of //overenie podla orientacie pohybu hraca
     0:
     begin
-      if ((Y - UpgradeSPeed - Speed - 2) < 66) then //ak je koniec mapy
+      if ((Y - UpgradeSPeed - Speed - 2) < 0) then //ak je koniec mapy
         exit;
       if ((Okolie.Steny[Round((Y - UpgradeSPeed - Speed - 2)) div
-        pixel - 2][Round((X - 10)) div pixel - 2].Typ in PovoleneBloky) and
+        pixel][Round((X - 10)) div pixel].Typ in PovoleneBloky) and
         (Okolie.Steny[Round((Y - UpgradeSPeed - Speed - 2)) div
-        pixel - 2][Round((X + 7)) div pixel - 2].Typ in PovoleneBloky)) then
+        pixel][Round((X + 7)) div pixel].Typ in PovoleneBloky)) then
         //ak sa moze posunut
         Result := True;
     end;
     //opakovanie pre vsetky smery
     1:
     begin
-      if ((Round((Y + UpgradeSPeed + Speed + 16)) div pixel - 2) >
+      if ((Round((Y + UpgradeSPeed + Speed + 16)) div pixel) >
         Length(Okolie.Steny) - 1) then
         exit;
       if (Okolie.Steny[Round((Y + Speed + UpgradeSPeed + 14)) div
-        pixel - 2][Round((X - 10)) div pixel - 2].Typ in PovoleneBloky) and
+        pixel][Round((X - 10)) div pixel].Typ in PovoleneBloky) and
         (Okolie.Steny[Round((Y + UpgradeSPeed + Speed + 14)) div
-        pixel - 2][Round((X + 7)) div pixel - 2].Typ in PovoleneBloky) then
+        pixel][Round((X + 7)) div pixel].Typ in PovoleneBloky) then
         Result := True;
     end;
     2:
     begin
-      if ((X - UpgradeSPeed - Speed - 11) < 66) then
+      if ((X - UpgradeSPeed - Speed - 11) < 0) then
         exit;
-      if ((Okolie.Steny[Round((Y - 1)) div pixel - 2][Round(
-        (X - UpgradeSPeed - Speed - 11)) div pixel - 2].Typ in PovoleneBloky) and
-        (Okolie.Steny[Round((Y - 1)) div pixel - 2][Round(
-        (X - UpgradeSPeed - Speed + 9)) div pixel - 2].Typ in PovoleneBloky) and
-        (Okolie.Steny[Round((Y + 13)) div pixel - 2][Round(
-        (X - UpgradeSPeed - Speed - 11)) div pixel - 2].Typ in PovoleneBloky) and
-        (Okolie.Steny[Round((Y + 13)) div pixel - 2][Round(
-        (X - UpgradeSPeed - Speed + 9)) div pixel - 2].Typ in PovoleneBloky)) then
+      if ((Okolie.Steny[Round((Y - 1)) div pixel][Round(
+        (X - UpgradeSPeed - Speed - 11)) div pixel].Typ in PovoleneBloky) and
+        (Okolie.Steny[Round((Y - 1)) div pixel][Round(
+        (X - UpgradeSPeed - Speed + 9)) div pixel].Typ in PovoleneBloky) and
+        (Okolie.Steny[Round((Y + 13)) div pixel][Round(
+        (X - UpgradeSPeed - Speed - 11)) div pixel].Typ in PovoleneBloky) and
+        (Okolie.Steny[Round((Y + 13)) div pixel][Round(
+        (X - UpgradeSPeed - Speed + 9)) div pixel].Typ in PovoleneBloky)) then
         Result := True;
     end;
     3:
     begin
-      if ((Round((X + UpgradeSPeed + Speed + 11)) div pixel - 2) >
-        Length(Okolie.Steny[Round(Y) div pixel - 2]) - 1) then
+      if ((Round((X + UpgradeSPeed + Speed + 11)) div pixel) >
+        Length(Okolie.Steny[Round(Y) div pixel]) - 1) then
         exit;
-      if ((Okolie.Steny[Round((Y - 1)) div pixel - 2][Round(
-        (X + UpgradeSPeed + Speed - 9)) div pixel - 2].Typ in PovoleneBloky) and
-        (Okolie.Steny[Round((Y - 1)) div pixel - 2][Round(
-        (X + UpgradeSPeed + Speed + 10)) div pixel - 2].Typ in PovoleneBloky) and
-        (Okolie.Steny[Round((Y + 13)) div pixel - 2][Round(
-        (X + UpgradeSPeed + Speed - 9)) div pixel - 2].Typ in PovoleneBloky) and
-        (Okolie.Steny[Round((Y + 13)) div pixel - 2][Round(
-        (X + UpgradeSPeed + Speed + 10)) div pixel - 2].Typ in PovoleneBloky)) then
+      if ((Okolie.Steny[Round((Y - 1)) div pixel][Round(
+        (X + UpgradeSPeed + Speed - 9)) div pixel].Typ in PovoleneBloky) and
+        (Okolie.Steny[Round((Y - 1)) div pixel][Round(
+        (X + UpgradeSPeed + Speed + 10)) div pixel].Typ in PovoleneBloky) and
+        (Okolie.Steny[Round((Y + 13)) div pixel][Round(
+        (X + UpgradeSPeed + Speed - 9)) div pixel].Typ in PovoleneBloky) and
+        (Okolie.Steny[Round((Y + 13)) div pixel][Round(
+        (X + UpgradeSPeed + Speed + 10)) div pixel].Typ in PovoleneBloky)) then
         Result := True;
     end;
   end;
@@ -546,7 +546,7 @@ end;
 function TPlayer.OverVybuch(Okolie: TSteny): boolean;
 begin
   Result := False;
-  if (Okolie.Steny[Round(Y) div pixel - 2][Round(X) div pixel - 2].Typ = 3) then
+  if (Okolie.Steny[Round(Y) div pixel][Round(X) div pixel].Typ = 3) then
     //ak sa hrac nachadza v policku kde je vybuch zabije ho
     Result := True;
 end;
@@ -555,7 +555,7 @@ function TPlayer.OverKoniec(Okolie: TSteny; Nepriatel: TNepriatel): boolean;
 begin
   Result := False;
   if ((length(Nepriatel.NPC) = 0) and
-    (Okolie.Steny[GetY div pixel - 2][GetX div pixel - 2].Upgrade = Brana)) then
+    (Okolie.Steny[GetY div pixel][GetX div pixel].Upgrade = Brana)) then
     //ak pocet nepriatelov na mape je 0 a stoji na brane
     Result := True;
 end;
@@ -585,6 +585,8 @@ begin
   LevelSkore := 0;
   X := SpawnSuradnice;
   Y := SpawnSuradnice;
+  PosunX := 0;
+  PosunY := 0;
   Zomrel := False;
   PohybujeSa := False;
   Opacne := False;

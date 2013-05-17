@@ -44,11 +44,11 @@ begin
     S := TFileStream.Create('skore.dat', fmOpenRead); //nacitaj subor a zacni od zaciatku
     S.Position := 0;
     setlength(Pomocnik, 0); //premenna kam budeme nacitavat ludi
-    if(S.Size > 0) then
-    repeat
-      setlength(Pomocnik, length(Pomocnik) + 1);
-      S.ReadBuffer(Pomocnik[high(POmocnik)], sizeOf(RSkore));
-    until (S.Position = S.Size); //nacitaj vsetkych ,ktory su v subore
+    if (S.Size > 0) then
+      repeat
+        setlength(Pomocnik, length(Pomocnik) + 1);
+        S.ReadBuffer(Pomocnik[high(POmocnik)], sizeOf(RSkore));
+      until (S.Position = S.Size); //nacitaj vsetkych ,ktory su v subore
     S.Free; //zavri subor
     HS.RowCount := length(Pomocnik) + 2;
     //zvacsime velkost tabulky o dany pocet ludi v skore subore
@@ -70,15 +70,15 @@ procedure THiSc.FormCreate(Sender: TObject);
 var
   c: TTextStyle;
 begin
-    c := HS.DefaultTextStyle; //aby tabulka mala texty v strede
-    c.Alignment := taCenter;
-    HS.DefaultTextStyle := c;
-    HS.GridLineStyle := psClear;
-    HS.RowCount := 2;
-    HS.Cells[0, 0] := 'Nick'; //co bude v fix bunkach
-    HS.Cells[1, 0] := 'Skóre';
-    HS.Cells[0, 1] := 'Žiadny';
-    HS.Cells[1, 1] := 'Žiadny';
+  c := HS.DefaultTextStyle; //aby tabulka mala texty v strede
+  c.Alignment := taCenter;
+  HS.DefaultTextStyle := c;
+  HS.GridLineStyle := psClear;
+  HS.RowCount := 2;
+  HS.Cells[0, 0] := 'Nick'; //co bude v fix bunkach
+  HS.Cells[1, 0] := 'Skóre';
+  HS.Cells[0, 1] := 'Žiadny';
+  HS.Cells[1, 1] := 'Žiadny';
 
 end;
 
