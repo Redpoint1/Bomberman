@@ -21,9 +21,10 @@ type
   { TSteny }
 
   TSteny = class   //trieda celej mapy
+    Cas: real;
     Steny: array of array of TStena;  //mapa z policok v poli
     BranaSteny: array of integer;
-    StenyObr: array[0..5] of TBitMap; //obrazky roznych stien
+    StenyObr: array[0..7] of TBitMap; //obrazky roznych stien
     BombyObr: array[0..4] of array[0..6] of TBitMap; //obrazky a fazy vybuchov bomby
     UpgradeObr: array[0..4] of TBitMap; //obrazky upgradeov
     procedure Vykresli(Obr: TCanvas); //vykreslenie celej mapy na obrazok
@@ -33,6 +34,7 @@ type
     procedure PriradObraz; //po nacitani zo subor prirad obrazok podla typu policka
     procedure PriradUpgrade; //priradi upgrade-y do policok
     procedure PriradBranu; //prirady branu do policka
+    procedure VypocitajCas; //ak nie je definovany cas na dokoncenie mapy u challenge
     constructor Create();
   end;
 
@@ -54,7 +56,7 @@ var
   xokolie, yokolie: integer;
 begin
   for yokolie := 0 to length(Steny) - 1 do
-    for xokolie := 0 to length(Steny[yokolie]) - 1 do //cez vsetky policka
+    for xokolie := 0 to length(Steny[yokolie]) - 1 do //cez vsetky polia
       if ((Steny[yokolie][xokolie].Typ = 3) and (Steny[yokolie][xokolie].Faza <= 0)) then
         //ak je koniec vybuchu
       begin
@@ -62,7 +64,7 @@ begin
         Steny[yokolie][xokolie].Obraz := StenyObr[0];  //aj obrazok
         Steny[yokolie][xokolie].BombaSmer := 0;
         Steny[yokolie][xokolie].Faza := Steny[yokolie][xokolie].Faza - 1;
-        //hod fazu policka na -1 aby sa neanimovalo (kedze uz vybuch skoncil)
+        //hod fazu pola na -1 aby sa neanimovalo (kedze uz vybuch skoncil)
       end
       else if (Steny[yokolie][xokolie].Faza > 0) then
         //ak este trva vybuch odpocitavaj cas ukoncenia (co je faza)
@@ -96,13 +98,19 @@ end;
 procedure TSteny.Nacitaj(Subor: string);
 var
   t, x, y: integer;
+  time: real;
   Sub: TFileStream;
 begin
   if fileexists('mapy/' + Subor + '.dat') then  //overenie ci existuje vobec ten subor
   begin
+    X := 0;
+    Y := 0;
+    time := 0;
+    t := 0;
     Sub := TFileStream.Create('mapy/' + Subor + '.dat', fmOpenRead);
-    Sub.ReadBuffer(y, 4); //kolko vlastne policok je
+    Sub.ReadBuffer(y, 4); //kolko vlastne poli je
     Sub.ReadBuffer(x, 4);
+    Sub.ReadBuffer(time, 8); //a kolko casu u challenge
     repeat    //nacvita policka podla velkosti a vysky mapy ,ktore su definovane v subore (riadku)
       begin
         SetLength(Steny, Length(Steny) + 1);
@@ -123,6 +131,10 @@ begin
     PriradObraz; //prirady obrazy podla nacitanych typov policok mapy
     PriradUpgrade; //priradi upgrade-y
     PriradBranu; //priradi branu
+    if (time = 0) then //ak nebol definovany cas na prejdenie
+      VypocitajCas //vypocitaj ho
+    else
+      cas := time; //inac prirad
   end;
 end;
 
@@ -149,7 +161,7 @@ begin
       if (Steny[i][j].Typ in BlokUpgrade) then //ak je v mnozine kde moze byt upgrade
       begin
         sanca := random(100); //z 100%
-        if ((sanca > 94) and (sanca < 99)) then  //4% sanca na normlane upgrade-y
+        if ((sanca > 95) and (sanca < 99)) then  //3% sanca na normlane upgrade-y
           Steny[i][j].Upgrade := UncommonUpgrade[random(length(UncommonUpgrade))]
         //nahodny jeden z nich
         else if (sanca = 99) then //1% sanca na cenen upgrade-y
@@ -188,6 +200,16 @@ begin
     Steny[y][x].Obraz := upgradeobr[brana - 1];
   end;
   setlength(branasteny, 0);
+end;
+
+procedure TSteny.VypocitajCas;
+var
+  x, y: integer;
+begin
+  for y := 0 to length(Steny) - 1 do
+    for x := 0 to length(Steny[y]) - 1 do
+      cas := cas + StenaCas[Steny[y][x].Typ];
+  //prejdi vsetky polia a podla typu pridavaj cas
 end;
 
 constructor TSteny.Create;

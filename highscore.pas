@@ -5,17 +5,15 @@ unit highscore;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Grids, share;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Grids, share;
 
 type
 
   { THiSc }
 
   THiSc = class(TForm)
-    CloseHS: TButton;
     HS: TStringGrid;
-    procedure CloseHSClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; {%H-}var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
@@ -28,6 +26,8 @@ var
   HiSc: THiSc;
 
 implementation
+
+uses zaklad;
 
 {$R *.lfm}
 
@@ -61,9 +61,10 @@ begin
   end;
 end;
 
-procedure THiSc.CloseHSClick(Sender: TObject);
+procedure THiSc.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   HiSc.hide; //ukru skore
+  Form1.Show;
 end;
 
 procedure THiSc.FormCreate(Sender: TObject);
@@ -77,7 +78,7 @@ begin
   HS.RowCount := 2;
   HS.Cells[0, 0] := 'Nick'; //co bude v fix bunkach
   HS.Cells[1, 0] := 'Skóre';
-  HS.Cells[0, 1] := 'Žiadny';
+  HS.Cells[0, 1] := 'Žiadny'; //keby nebol nikto v tbulke este
   HS.Cells[1, 1] := 'Žiadny';
 
 end;

@@ -14,7 +14,7 @@ type
   TNpc = class  //trieda nepriatelov
     X, Y: real;
     Smer, Faza, Typ, Sekunda: integer;
-    //suradnice, orientacia pohybu, animacia, typ nepriatela, cas pohybu
+    //suradnice, orientacia pohybu, animacia, typ nepriatela, cas statia
     Zomrel, PohybujeSa: boolean; //prave sa pohybuje
     constructor Create(XX, YY, TypNPC: integer);
     function GetX: integer; //real -> int
@@ -26,21 +26,22 @@ type
   TNepriatel = class  //trieda nepratelov (viacerych)
     Skore: integer; //celkovy pocet skore hraca ,ktore ziskal vybuchom
     NPC: array of TNpc; //pole objektov nepriatelov
-    NpcObr: array[0..0] of array[0..2] of TBitMap; //obrazky nepriatelov
+    NpcObr: array[0..2] of array[0..2] of TBitMap; //obrazky nepriatelov
     procedure Pridaj(XX, YY, Typ: integer); //pridanie dalsieho nepriatela
     procedure vymazNilNpc; //vymazanie z pola nepratelov ktori boli zniceni
     constructor Create();
-    procedure Vykresli(Obr: TCanvas; Okolie: TSteny);
+    procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Diff, XX, YY: integer);
     //vykreslenie nepriatelov na obrazok
-    procedure Casovac;  // odpocitavanie pohybu nepriatelov
-    procedure PohybujSa(Kto: TNpc; Okolie: TSteny); //procedura na pohyb nepriatelov
+    procedure Casovac(Diff: integer);  // odpocitavanie pohybu nepriatelov
+    procedure PohybujSa(Kto: TNpc; Okolie: TSteny; Diff, XX, YY: integer);
+    //procedura na pohyb nepriatelov
     procedure VyberSmer(Komu: TNpc); //vyberanie smeru kam sa bude pohybovat
-    procedure Posun(Koho: TNpc); //zmena suradnic nepriatela
+    procedure Posun(Koho: TNpc; Diff: integer); //zmena suradnic nepriatela
     procedure OverVybuch(Okolie: TSteny); //overenie ci nepiratela zasiahol vybuch
     procedure Nacitaj(S: string);  //nacitanie zo suboru poziciu a typ nepriatela
     procedure PridajSkore(Nepriatel: TNPC); //pripocita skore podla typu nepriatela
     function vratSkore: integer; //vrati pocet skore
-    function OverPosun(Komu: TNpc; Okolie: TSteny): boolean;
+    function OverPosun(Komu: TNpc; Okolie: TSteny; Diff: integer): boolean;
     //overenie ci sa moze posunu do daneho policka
   end;
 
@@ -79,8 +80,8 @@ begin
   setLength(NPC, 0);
   Obrazok := TBitMap.Create;
   Obrazok.LoadFromFile('img/npc.bmp');  //nacitanie obrazkov nepriatelov aj s animaciami
-  for i := 0 to 0 do
-    for j := 0 to 2 do
+  for i := 0 to length(NpcObr) - 1 do
+    for j := 0 to length(NpcObr[i]) - 1 do
     begin
       NpcObr[i][j] := TBitMap.Create;
       NpcObr[i][j].Width := pixel;
@@ -93,7 +94,7 @@ begin
   Obrazok.Free;
 end;
 
-procedure TNepriatel.Vykresli(Obr: TCanvas; Okolie: TSteny);
+procedure TNepriatel.Vykresli(Obr: TCanvas; Okolie: TSteny; Diff, XX, YY: integer);
 var
   i: integer;
 begin
@@ -103,7 +104,7 @@ begin
   begin
     if not (NPC[i].Zomrel) then  //ak nevybuchol
     begin
-      PohybujSa(NPC[i], Okolie);
+      PohybujSa(NPC[i], Okolie, Diff, XX, YY);
       //zmena pozicie pri pohybovani ,alebo priradenie dalsieho pohybu na ine policko
       Obr.Draw(NPC[i].GetX - 17, NPC[i].GetY - 17,
         NpcObr[NPC[i].Typ][NPC[i].Faza div 50]);
@@ -118,7 +119,7 @@ begin
   end;
 end;
 
-procedure TNepriatel.Casovac;
+procedure TNepriatel.Casovac(Diff: integer);
 var
   i: integer;
 begin
@@ -127,16 +128,16 @@ begin
     if ((NPC[i].pohybujeSa) and not (NPC[i].Zomrel)) then
       //ak sa prave pohybuje a nezomrel
     begin
-      Posun(NPC[i]); //zmenime poziciu
+      Posun(NPC[i], Diff); //zmenime poziciu
       if (((NPC[i].GetX mod pixel) = 17) and ((NPC[i].GetY mod pixel) = 17) and
         (NPC[i].Smer <> 0)) then  //ak doslo do stredu noveho policka
       begin
         NPC[i].PohybujeSa := False;  //skonci pohyb
       end;
       if (((NPC[i].GetX mod pixel) = 17) and ((NPC[i].GetY mod pixel) = 17) and
-        (NPC[i].Smer = 0)) then  //ak je v strede policka
+        (NPC[i].Smer = 0)) then  //ak je v strede policka a stoji
       begin
-        if (NPC[i].Sekunda = 0) then //a uz skoncil pohyb
+        if (NPC[i].Sekunda = 0) then //a uz skoncil pohyb "statia"
         begin
           NPC[i].PohybujeSa := False; //zresetujeme cas na pohyb
           NPC[i].Sekunda := 1000;
@@ -150,19 +151,46 @@ begin
   end;
 end;
 
-procedure TNepriatel.PohybujSa(Kto: TNpc; Okolie: TSteny);
+procedure TNepriatel.PohybujSa(Kto: TNpc; Okolie: TSteny; Diff, XX, YY: integer);
 begin
-  VyberSmer(Kto); //vybereme smer nepriatelovi ktorym ma ist
-  if (not (Kto.PohybujeSa)) then
-    if (OverPosun(Kto, Okolie)) then //ak sa nepohybuje a moze ist na dane policko
-    begin
-      Kto.PohybujeSa := True; //zacne sa pohybovat
-    end
-    else
-      Kto.PohybujeSa := False; //ak nevi prejst na dalsie policko nepohne sa
   if (Kto.faza = 0) then //ak skoncila animacia
     Kto.Faza := 100; //zresetujeme animaciu
   Dec(Kto.Faza, 1);
+  if (Kto.PohybujeSa) then //ak sa pohybuje nepokracuj
+    exit;
+  if ((diff = 0) or (((XX div pixel - Kto.GetX div pixel) <> 0) and
+    ((YY div pixel - Kto.GetY div pixel) <> 0))) then
+    VyberSmer(Kto)
+  //ak hrac ma lahku uroven alebo sa hrac nenachadza s danym npc v rovnakej X a Y
+  else
+  begin
+    if (((YY div pixel - Kto.GetY div pixel) = 0) and (XX > Kto.GetX) and
+      (abs(XX - Kto.getX) <= NPCNasielHraca)) then
+      //ak hrac je od neho napravo a registruje ho tak nasmeruj npc smerom doprava
+      Kto.Smer := 4
+    else if (((YY div pixel - Kto.GetY div pixel) = 0) and (XX < Kto.GetX) and
+      (abs(XX - Kto.getX) <= NPCNasielHraca)) then //to iste iba dolava
+      Kto.Smer := 3
+    else if (((XX div pixel - Kto.GetX div pixel) = 0) and (YY > Kto.GetY) and
+      (abs(YY - Kto.getY) <= NPCNasielHraca)) then ///to iste dole
+      Kto.Smer := 2
+    else if (((XX div pixel - Kto.GetX div pixel) = 0) and (YY < Kto.GetY) and
+      (abs(YY - Kto.getY) <= NPCNasielHraca)) then  //to iste hore
+      Kto.Smer := 1
+    else if ((XX - Kto.GetX = 0) and (YY - Kto.GetY = 0)) then
+      //ak su na rovnakom nech stoji
+    begin
+      Kto.Smer := 0;
+      Kto.Sekunda := 1000;
+    end
+    else
+      VyberSmer(Kto);
+    //ak nesplna ani jedno z podmienok tak pokracuj ako na "lahkej" obtiaznosti
+  end;
+  if (OverPosun(Kto, Okolie, Diff)) then //ak sa nepohybuje a moze ist na dane policko
+    Kto.PohybujeSa := True //zacne sa pohybovat
+  else     //hod vyber smer este
+    Kto.PohybujeSa := False; //ak nevi prejst na dalsie policko nepohne sa
 end;
 
 procedure TNepriatel.VyberSmer(Komu: TNpc);
@@ -193,13 +221,13 @@ begin
   end;
 end;
 
-procedure TNepriatel.Posun(Koho: TNpc);
+procedure TNepriatel.Posun(Koho: TNpc; Diff: integer);
 begin
-  case Koho.Smer of  //podla smeru zmenime suradnice nepriatela
-    1: Koho.Y := Koho.Y - NpcSpeed[Koho.Typ];
-    2: Koho.Y := Koho.Y + NpcSpeed[Koho.Typ];
-    3: Koho.X := Koho.X - NpcSpeed[Koho.Typ];
-    4: Koho.X := Koho.X + NpcSpeed[Koho.Typ];
+  case Koho.Smer of  //podla smeru zmenime suradnice nepriatela a podla obtiaznosti hry
+    1: Koho.Y := Koho.Y - NpcSpeed[Diff][Koho.Typ];
+    2: Koho.Y := Koho.Y + NpcSpeed[Diff][Koho.Typ];
+    3: Koho.X := Koho.X - NpcSpeed[Diff][Koho.Typ];
+    4: Koho.X := Koho.X + NpcSpeed[Diff][Koho.Typ];
   end;
 end;
 
@@ -225,11 +253,14 @@ var
 begin
   if fileexists('mapy/' + S + '.dat') then //overenie ci existuje ten subor
   begin
+    x := 0;
+    y := 0;
+    typ := 0;
     Sub := TFileStream.Create('mapy/' + S + '.dat', fmOpenRead);
     //zadefinujeme a otvorime subor
     Sub.ReadBuffer(Y, 4);
     Sub.ReadBuffer(X, 4);
-    Sub.Position := (X * Y + 3) * 4;
+    Sub.Position := (X * Y + 5) * 4;
     //preskocime na poziciu kde zacinaju informacie o nepriateloch na mape
     if (Sub.Size > Sub.Position) then //ak nejaky su
     begin
@@ -247,11 +278,7 @@ end;
 
 procedure TNepriatel.PridajSkore(Nepriatel: TNPC);
 begin
-  case Nepriatel.Typ of  //podla typu nepriatela priradi definovany pocet bodov
-    0: Inc(Skore, 1000);
-    1: Inc(Skore, 1000);
-    2: Inc(Skore, 2000);
-  end;
+  Inc(Skore, SkoreZaNpc[Nepriatel.Typ]); //pridaj skore za dany typ npc
 end;
 
 function TNepriatel.vratSkore: integer;
@@ -260,7 +287,7 @@ begin
   Skore := 0; //zresetuj skore
 end;
 
-function TNepriatel.OverPosun(Komu: TNpc; Okolie: TSteny): boolean;
+function TNepriatel.OverPosun(Komu: TNpc; Okolie: TSteny; Diff: integer): boolean;
 begin
   Result := False;
   case Komu.Smer of //podla smeru
@@ -270,7 +297,7 @@ begin
       if ((Komu.GetY div pixel - 1) < 0) then   //ak by chcel ist za okraje mapy
         exit;
       if (Okolie.Steny[Komu.GetY div pixel - 1][Komu.GetX div pixel].Typ in
-        NpcBloky[Komu.Typ]) then
+        NpcBloky[Diff][Komu.Typ]) then
         //ak moze ist do urcite typu policka
         Result := True;
     end;
@@ -280,7 +307,7 @@ begin
       if ((Komu.GetY div pixel + 1) > Length(Okolie.Steny) - 1) then
         exit;
       if (Okolie.Steny[Komu.GetY div pixel + 1][Komu.GetX div pixel].Typ in
-        NpcBloky[Komu.Typ]) then
+        NpcBloky[Diff][Komu.Typ]) then
         Result := True;
     end;
     3: //doprava
@@ -288,7 +315,7 @@ begin
       if ((Komu.GetX div pixel - 1) < 0) then
         exit;
       if (Okolie.Steny[Komu.GetY div pixel][Komu.GetX div pixel - 1].Typ in
-        NpcBloky[Komu.Typ]) then
+        NpcBloky[Diff][Komu.Typ]) then
         Result := True;
     end;
     4:  //dolava
@@ -297,7 +324,7 @@ begin
         Length(Okolie.Steny[Komu.GetY div pixel]) - 1) then
         exit;
       if (Okolie.Steny[Komu.GetY div pixel][Komu.GetX div pixel + 1].Typ in
-        NpcBloky[Komu.Typ]) then
+        NpcBloky[Diff][Komu.Typ]) then
         Result := True;
     end;
   end;
@@ -319,7 +346,7 @@ end;
 
 function TNpc.GetX: integer;
 begin
-  Result := Round(X);
+  Result := Round(X);  //real -> int
 end;
 
 function TNpc.GetY: integer;

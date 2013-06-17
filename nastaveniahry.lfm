@@ -1,0 +1,56 @@
+object NastavPop: TNastavPop
+  Left = 465
+  Height = 240
+  Top = 216
+  Width = 320
+  HelpType = htKeyword
+  HelpKeyword = 'HTML/manual.html#1-4'
+  Caption = 'Nastavenie'
+  ClientHeight = 240
+  ClientWidth = 320
+  Color = 11429457
+  OnClose = FormClose
+  LCLVersion = '0.9.31'
+  object RadioGroup1: TRadioGroup
+    Left = 64
+    Height = 105
+    Top = 8
+    Width = 185
+    AutoFill = True
+    Caption = 'Obtiažnosť'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 87
+    ClientWidth = 181
+    ItemIndex = 0
+    Items.Strings = (
+      'Ľahká'
+      'Normálna'
+      'Challenge (výzva)'
+    )
+    TabOrder = 0
+  end
+  object Button1: TButton
+    Left = 120
+    Height = 25
+    Top = 194
+    Width = 75
+    Caption = 'Uložiť'
+    OnClick = Button1Click
+    TabOrder = 1
+  end
+  object AutoSave: TCheckBox
+    Left = 88
+    Height = 19
+    Top = 136
+    Width = 135
+    Caption = 'Automatické uloženie'
+    TabOrder = 2
+  end
+end

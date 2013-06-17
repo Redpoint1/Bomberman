@@ -5,7 +5,7 @@ unit player;
 interface
 
 uses
-  Classes, SysUtils, Graphics, ExtCtrls, Dialogs, game, npc, share;
+  Classes, SysUtils, Graphics, ExtCtrls, Dialogs, game, share, npc;
 
 type
 
@@ -28,19 +28,19 @@ type
   TPlayer = class
     Nick: string;
     Zivot, Smer, Faza, Skore, PocetBomb, UpgradePocetBomb, UpgradeRadius,
-    BombRadius, Level, LevelSkore, PosunX, PosunY: integer;
-    //snad z nazvovo premennych pochopitelne iba tie s Upgrade* su docastne upgrade-y na mapu
-    X, Y, UpgradeSpeed, Speed: real;
-    //pozicia hraca, docasne zvysenie rychlosti na mapu a rychlost hraca
-    Zomrel, PohybujeSa, Opacne: boolean;
-    //ci zomrel, sa pohybuje a opakovanie animacie pohybovania
+    BombRadius, Level, LevelSkore, PosunX, PosunY, Obtiaznost: integer;
+    //snad z nazvov premennych pochopitelne iba tie s Upgrade* su docastne upgrade-y na mapu + PosunX(Y) su hodnoty o kolko je posunuty hrac pri ciastocnom vykresleni mapy
+    X, Y, UpgradeSpeed, Speed, CasMapy: real;
+    //pozicia hraca, docasne zvysenie rychlosti na mapu , rychlost hraca, kolko hrame danu mapu
+    Zomrel, PohybujeSa, Opacne, AutoSave, CustomMapa: boolean;
+    //ci zomrel, sa pohybuje a opakovanie animacie pohybovania, ci ma automaticky ulozit profil, ci je docastny profil
     Bomby: array of TBomba;  //polozene bomby hraca
     BombyObr: array[0..1] of TBitMap;  //animacie bomby
     HracObr: array[0..4] of array[0..2] of TBitMap; //animacie hraca
+
     procedure Posun(klaves: integer); //zmena pozicie hraca podla orientacie pohybu
-    procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel;
+    procedure Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel);
     //vykreslenie hraca
-      Cas: TTimer);
     procedure VykresliBombu(Obr: TCanvas; Walli: TSteny); //vykreslenie bomby
     procedure ZmazBomby; //zmazanie vybuchnutych bomb
     procedure ZmazNilBomby; //zmazanie bomb z pola
@@ -50,6 +50,7 @@ type
     procedure UlozSkore; //ulozi skore hraca do suboru
     procedure resetMap; //resetnutie premennych hraca pri zabiti
     procedure resetNextMap; //resetnutie premenych pri pokracovanie do dalsieho levelu
+    procedure PohybujSa(Wall: TSteny); //Posuvanie hraca po mape
     function OverNpc(Nepriatel: TNepriatel): boolean;
     //zabitie hraca ked je nepriatel blizko
     function OverPosun(Okolie: TSteny): boolean;
@@ -116,9 +117,10 @@ begin
       if (Walle.Steny[PosY][PosX].Upgrade < 0) then
         //ak nema upgrade teda nie je to brana
       begin
-        Walle.Steny[PosY][PosX].Typ := 0;  //nastavenie na volne policko
-        Walle.Steny[PosY][PosX].Obraz := Walle.StenyObr[0];
-        //zmenime obrazok policka na volne policko
+        Walle.Steny[PosY][PosX].Typ := ZmenaStien[Walle.Steny[PosY][PosX].Typ];
+        //nastavenie na typ steny podla ZmenaStien
+        Walle.Steny[PosY][PosX].Obraz := Walle.StenyObr[Walle.Steny[PosY][PosX].Typ];
+        //zmenime obrazok policka na dany typ
       end
       else //ak je pod stenou brana
       begin
@@ -131,7 +133,7 @@ begin
     end;
   end;
   if (Walle.Steny[PosY][PosX].Typ = 0) then
-    //ak je volne policko nastavi policky na vybuch
+    //ak je volne policko nastavi pole na vybuch
   begin
     Walle.Steny[PosY][PosX].Typ := 3;
     Walle.Steny[PosY][PosX].Faza := 501;
@@ -160,7 +162,7 @@ begin
     end;
   end
   else if (Walle.Steny[PosY][PosX].Typ = 3) then
-    //ak uz na tom policku vybuchuje tak len obnovi dlzku vybuchu na policku
+    //ak uz na tom poli vybuchuje tak len obnovi dlzku vybuchu
   begin
     Walle.Steny[PosY][PosX].Faza := 500;
     Result := True;
@@ -179,17 +181,12 @@ begin
   end;
 end;
 
-procedure TPlayer.Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel;
-  Cas: TTimer);
+procedure TPlayer.Vykresli(Obr: TCanvas; Okolie: TSteny; Nepriatel: TNepriatel);
 begin
   if (((OverVybuch(Okolie)) or (OverNpc(Nepriatel))) and not (Zomrel)) then
     //overi ci nieco hraca nezabije a ak ano tak znizi mu zivot + zastavi pohyb hraca
   begin
-    if (Cas.Enabled) then //ak sa pohybuje
-    begin
-      Cas.Enabled := False; //zrus pohyb
-      PohybujeSa := False;
-    end;
+    PohybujeSa := False;
     Zomrel := True; //pridaj ze zomrel a zniz mu zivot
     Faza := -1;
     Smer := 4; //nie cisto smer ,ale riadok animacie hraca v bmp subore
@@ -351,11 +348,11 @@ begin
   begin
     case (Okolie.Steny[GetY div pixel][GetX div pixel].Upgrade) of
       //podla typu upgradeu zvys hodnoty (ak neprekracuje maximum povoleny upgrade)
-      0: if ((PocetBomb + UpgradePocetBomb) < MaxPocetBomb) then
+      0: if ((PocetBomb + UpgradePocetBomb - 1) < MaxUpgrade[0]) then
           Inc(UpgradePocetBomb);
-      1: if ((BombRadius + UpgradeRadius) < MaxRadiusBomby) then
+      1: if ((BombRadius + UpgradeRadius - 1) < MaxUpgrade[1]) then
           Inc(UpgradeRadius);
-      2: if ((Speed + UpgradeSpeed) < MaxHracSpeed) then
+      2: if ((Speed + UpgradeSpeed) < (MaxUpgrade[2] * 0.05 + StartSpeed)) then
           UpgradeSpeed := UpgradeSpeed + UpgradeSpeedHodnota;
       3: Inc(Zivot);
     end;
@@ -374,7 +371,7 @@ procedure TPlayer.Load(sub: string);
 var
   S: TFileStream;
 begin
-  //overenie je v evente kliknutia na tlacitko
+  //overenie existuje subor je v evente LoadClick
   S := TFileStream.Create('profil/' + Sub + '.dat', fmOpenRead); //otvor a resetni subor
   S.Position := 0;
   S.ReadBuffer(Zivot, 4); //nacitaj udaje zo suboru
@@ -382,7 +379,9 @@ begin
   S.ReadBuffer(PocetBomb, 4);
   S.ReadBuffer(BombRadius, 4);
   S.ReadBuffer(Level, 4);
+  S.ReadBuffer(Obtiaznost, 4);
   S.ReadBuffer(Speed, 8);
+  S.ReadBuffer(AutoSave, 1);
   S.Free; //zavri subor
 end;
 
@@ -402,7 +401,9 @@ begin
     S.WriteBuffer(PocetBomb, 4);
     S.WriteBuffer(BombRadius, 4);
     S.WriteBuffer(Level, 4);
+    S.WriteBuffer(Obtiaznost, 4);
     S.WriteBuffer(Speed, 8);
+    S.WriteBuffer(AutoSave, 1);
     S.Free; //zapis informacie do suboru a zatvor ho
   end;
 end;
@@ -420,7 +421,8 @@ begin
     S := TFileStream.Create('skore.dat', fmOpenReadWrite);
     if (S.Size > 0) then
       repeat
-        setlength(PocetSkore, length(PocetSkore) + 1); //zvysime pole a precitame zo suboru
+        setlength(PocetSkore, length(PocetSkore) + 1);
+        //zvysime pole a precitame zo suboru
         S.ReadBuffer(PocetSkore[high(PocetSkore)], sizeOf(RSkore));
       until (S.Position = S.Size); //pokial neprideme na koniec
     setlength(PocetSkore, length(PocetSkore) + 1);
@@ -454,8 +456,10 @@ begin
   Y := SpawnSuradnice;
   setlength(bomby, 0);
   Zomrel := False;
+  PohybujeSa := False;
   Faza := 32;
   Smer := 1;
+  CasMapy := 0; //zresetujeme cas na danej mape
 end;
 
 procedure TPlayer.resetNextMap;
@@ -466,7 +470,22 @@ begin
   UpgradeRadius := 0;
   UpgradeSpeed := 0;
   Inc(Skore, LevelSkore);
+  PohybujeSa := False;
   LevelSkore := 0;
+  if Autosave then
+    Save; //ak sme v nastavenia dali automaticke ulozenie tak uloz profil
+end;
+
+procedure TPlayer.PohybujSa(Wall: TSteny);
+begin
+  if (PohybujeSa and OverPosun(Wall)) then
+    //overenie ci sa moze pohnut a nema ziadnu prekazku pred sebou
+  begin
+    Posun(Smer); //meni poziciu hraca podla orientacie pohybu
+    OverUpgrade(Wall); //overi ci nevstupil na upgrade
+  end
+  else
+    PohybujeSa := False;  //ak ma prekazku prestan sa pohybovat
 end;
 
 function TPlayer.OverNpc(Nepriatel: TNepriatel): boolean;
@@ -477,7 +496,7 @@ begin
   for i := 0 to length(Nepriatel.NPC) - 1 do
     //preveruje ci ziadny nepriatel nie je v okruhu 25 u hraca
     if (sqrt(((X - Nepriatel.NPC[i].X) * (X - Nepriatel.NPC[i].X)) +
-      ((Y - Nepriatel.NPC[i].Y) * (Y - Nepriatel.NPC[i].Y))) < 25) then
+      ((Y - Nepriatel.NPC[i].Y) * (Y - Nepriatel.NPC[i].Y))) < RadiusCheck) then
     begin
       Result := True;  //ak hodi true tak hrac bude zabity
       exit;
@@ -493,9 +512,9 @@ begin
       if ((Y - UpgradeSPeed - Speed - 2) < 0) then //ak je koniec mapy
         exit;
       if ((Okolie.Steny[Round((Y - UpgradeSPeed - Speed - 2)) div
-        pixel][Round((X - 10)) div pixel].Typ in PovoleneBloky) and
+        pixel][Round((X - 10)) div pixel].Typ in PovoleneBloky[Obtiaznost]) and
         (Okolie.Steny[Round((Y - UpgradeSPeed - Speed - 2)) div
-        pixel][Round((X + 7)) div pixel].Typ in PovoleneBloky)) then
+        pixel][Round((X + 7)) div pixel].Typ in PovoleneBloky[Obtiaznost])) then
         //ak sa moze posunut
         Result := True;
     end;
@@ -506,9 +525,9 @@ begin
         Length(Okolie.Steny) - 1) then
         exit;
       if (Okolie.Steny[Round((Y + Speed + UpgradeSPeed + 14)) div
-        pixel][Round((X - 10)) div pixel].Typ in PovoleneBloky) and
+        pixel][Round((X - 10)) div pixel].Typ in PovoleneBloky[Obtiaznost]) and
         (Okolie.Steny[Round((Y + UpgradeSPeed + Speed + 14)) div
-        pixel][Round((X + 7)) div pixel].Typ in PovoleneBloky) then
+        pixel][Round((X + 7)) div pixel].Typ in PovoleneBloky[Obtiaznost]) then
         Result := True;
     end;
     2:
@@ -516,13 +535,14 @@ begin
       if ((X - UpgradeSPeed - Speed - 11) < 0) then
         exit;
       if ((Okolie.Steny[Round((Y - 1)) div pixel][Round(
-        (X - UpgradeSPeed - Speed - 11)) div pixel].Typ in PovoleneBloky) and
+        (X - UpgradeSPeed - Speed - 11)) div pixel].Typ in PovoleneBloky[Obtiaznost]) and
         (Okolie.Steny[Round((Y - 1)) div pixel][Round(
-        (X - UpgradeSPeed - Speed + 9)) div pixel].Typ in PovoleneBloky) and
+        (X - UpgradeSPeed - Speed + 9)) div pixel].Typ in PovoleneBloky[Obtiaznost]) and
         (Okolie.Steny[Round((Y + 13)) div pixel][Round(
-        (X - UpgradeSPeed - Speed - 11)) div pixel].Typ in PovoleneBloky) and
+        (X - UpgradeSPeed - Speed - 11)) div pixel].Typ in PovoleneBloky[Obtiaznost]) and
         (Okolie.Steny[Round((Y + 13)) div pixel][Round(
-        (X - UpgradeSPeed - Speed + 9)) div pixel].Typ in PovoleneBloky)) then
+        (X - UpgradeSPeed - Speed + 9)) div pixel].Typ in
+        PovoleneBloky[Obtiaznost])) then
         Result := True;
     end;
     3:
@@ -531,13 +551,14 @@ begin
         Length(Okolie.Steny[Round(Y) div pixel]) - 1) then
         exit;
       if ((Okolie.Steny[Round((Y - 1)) div pixel][Round(
-        (X + UpgradeSPeed + Speed - 9)) div pixel].Typ in PovoleneBloky) and
+        (X + UpgradeSPeed + Speed - 9)) div pixel].Typ in PovoleneBloky[Obtiaznost]) and
         (Okolie.Steny[Round((Y - 1)) div pixel][Round(
-        (X + UpgradeSPeed + Speed + 10)) div pixel].Typ in PovoleneBloky) and
+        (X + UpgradeSPeed + Speed + 10)) div pixel].Typ in PovoleneBloky[Obtiaznost]) and
         (Okolie.Steny[Round((Y + 13)) div pixel][Round(
-        (X + UpgradeSPeed + Speed - 9)) div pixel].Typ in PovoleneBloky) and
+        (X + UpgradeSPeed + Speed - 9)) div pixel].Typ in PovoleneBloky[Obtiaznost]) and
         (Okolie.Steny[Round((Y + 13)) div pixel][Round(
-        (X + UpgradeSPeed + Speed + 10)) div pixel].Typ in PovoleneBloky)) then
+        (X + UpgradeSPeed + Speed + 10)) div pixel].Typ in
+        PovoleneBloky[Obtiaznost])) then
         Result := True;
     end;
   end;
@@ -547,7 +568,7 @@ function TPlayer.OverVybuch(Okolie: TSteny): boolean;
 begin
   Result := False;
   if (Okolie.Steny[Round(Y) div pixel][Round(X) div pixel].Typ = 3) then
-    //ak sa hrac nachadza v policku kde je vybuch zabije ho
+    //ak sa hrac nachadza v poli kde je vybuch zabije ho
     Result := True;
 end;
 
@@ -590,11 +611,13 @@ begin
   Zomrel := False;
   PohybujeSa := False;
   Opacne := False;
+  CustomMapa := False;
   Smer := 0;
   BombRadius := StartRadius;
   UpgradePocetBomb := 0;
   UpgradeRadius := 0;
   UpgradeSPeed := 0;
+  Obtiaznost := 0;
   setlength(Bomby, 0);
   Obrazok := TBitMap.Create;
   Obrazok.LoadFromFile('img/bomba.bmp');  //nacitavanie obrazkov bomby

@@ -5,8 +5,8 @@ unit upgradeform;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons,
-  StdCtrls, ExtCtrls, player, share;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
+  Buttons, ExtCtrls, player, share;
 
 type
 
@@ -15,14 +15,13 @@ type
   PPlayer = ^TPlayer;
 
   TUpgrade = class(TForm)
-    Button1: TButton;
     Image1: TImage;
     RadiusButton: TSpeedButton;
     CountButton: TSpeedButton;
     SpeedButton: TSpeedButton;
     LifeButton: TSpeedButton;
-    procedure Button1Click(Sender: TObject);
     procedure CountButtonClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; {%H-}var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure LifeButtonClick(Sender: TObject);
     procedure RadiusButtonClick(Sender: TObject);
@@ -40,6 +39,8 @@ var
 
 implementation
 
+uses zaklad;
+
 {$R *.lfm}
 
 { TUpgrade }
@@ -50,6 +51,11 @@ begin
   begin //over ci je na to dostatocny pocet skore a ci nemame upgradnenuty na max
     Inc(Hrac^.BombRadius);  //zvysime ten radius
     Dec(Hrac^.Skore, UpgradeCost[1]); //znizime skore
+    if ((Hrac^.BombRadius + Hrac^.UpgradeRadius - 1) > MaxUpgrade[1]) then
+      //osetrenie aby sme vdaka docastnym upgradom nemai viacej ako max
+      Hrac^.UpgradeRadius := Hrac^.UpgradeRadius -
+        (Hrac^.UpgradeRadius + Hrac^.BombRadius - 1 - MaxUpgrade[1]);
+    //o kolko musime znizit docastny upgrade aby sme mali max
     vykresliInfo; //vykreslenie updatenutych info v upgrade forme
     ShowMessage('Veľkosť radiusu je: ' + IntToStr(Hrac^.BombRadius));
     //oznamenie ,ze aky radius mame
@@ -65,9 +71,13 @@ begin
   begin //ak mame dostatocne skore a nemame max upgrade
     Hrac^.Speed := Hrac^.Speed + 0.05; //zvysime rychlost
     Dec(Hrac^.Skore, UpgradeCost[2]); //znizime skore
+    if ((Hrac^.Speed + Hrac^.UpgradeSpeed) > (StartSpeed + MaxUpgrade[2] * 0.05)) then
+      Hrac^.UpgradeSpeed := Hrac^.UpgradeSpeed - (Hrac^.UpgradeSpeed +
+        Hrac^.Speed - (StartSpeed + MaxUpgrade[2] * 0.05));
+    //dalsie overovanie ,aby sme nemali vacsiu rychlost ako max
     vykresliInfo; //to iste ako u radius
-    ShowMessage('Rýchlosť je: +' +
-      IntToStr(Round((Hrac^.Speed - StartSpeed) * 100)) + '%');
+    ShowMessage('Rýchlosť je: +' + IntToStr(Round(
+      (Hrac^.Speed - StartSpeed) * 100)) + '%');
     //o kolko % mame zvysenu rychlost od povodnej
   end
   else
@@ -83,7 +93,7 @@ begin
   //info ze kolko skore mame aby sme vedeli ci mozme kupit upgrade (nepripocita skore z mapy na ktorej prave hrajeme, aby sa to nedalo podvadzat
   Image1.Canvas.TextOut(Image1.Width div 2 - Image1.Canvas.TextWidth('Vaše skore:') div
     2, 50, 'Vaše skore:');
-  //centrovanie textu nad buttonom kolko_mame/max_kolko_mozmo
+  //centrovanie textu nad buttonom kolko_mame/max_kolko_mozme
   Image1.Canvas.TextOut(Image1.Width div 2 - Image1.Canvas.TextWidth(
     IntToStr(Hrac^.Skore)) div 2, 70, IntToStr(Hrac^.Skore));
   Image1.Canvas.TextOut(104 - Image1.Canvas.TextWidth(
@@ -116,6 +126,10 @@ begin
   begin //ak mame tolko skore a nie je max upgrade
     Inc(Hrac^.PocetBomb); //zvysime pocet bomb
     Dec(Hrac^.Skore, UpgradeCost[0]); //znizime skore
+    if ((Hrac^.PocetBomb + Hrac^.UpgradePocetBomb - 1) > MaxUpgrade[0]) then
+      Hrac^.UpgradePocetBomb :=
+        Hrac^.UpgradePocetBomb - (Hrac^.UpgradePocetBomb + Hrac^.PocetBomb -
+        1 - MaxUpgrade[0]);//dalsie overovanie aby sme neprekrocili MAX
     vykresliInfo; //to iste ako u radiusu
     ShowMessage('Počet bomb je: ' + IntToStr(Hrac^.PocetBomb));
     //oznami ze kolko bomb mozme pokladat
@@ -124,15 +138,16 @@ begin
     ShowMessage('Nemáte dostatočný počet bodov, alebo máte maximálny počet dovolených upgrade-ov!'); //<---
 end;
 
+procedure TUpgrade.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  Upgrade.Hide; //ukry formular
+  Form1.Show;
+end;
+
 procedure TUpgrade.FormCreate(Sender: TObject);
 begin
   Image1.Canvas.font.Size := 12; //nastavenie pisma a sirky pisma
   Image1.Canvas.Font.Bold := True;
-end;
-
-procedure TUpgrade.Button1Click(Sender: TObject);
-begin
-  Upgrade.Hide; //ukry formular
 end;
 
 procedure TUpgrade.LifeButtonClick(Sender: TObject); //ak chceme zivoty

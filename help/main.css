@@ -1,0 +1,173 @@
+﻿
+html {
+    background-image: url("./img/stena0.png");
+}
+.hlavicka {
+    background-image: url("./img/logo.png");
+    height: 100px;
+    margin: auto;
+    width: 520px;
+}
+.obsah {
+    background-color: #999999;
+    border: 1px solid #000000;
+    border-radius: 10px 10px 10px 10px;
+    margin: auto;
+    padding: 0;
+    width: 910px;
+}
+.hlavny p {
+    margin: 0;
+    padding: 5px;
+}
+.navigacia {
+    background: none repeat scroll 0 0 #CCCCCC;
+    border-radius: 10px 10px 0 0;
+    padding: 7px 7px 7px 0;
+}
+.hlavny {
+    background-color: #DDDDDD;
+    font-family: Georgia;
+    padding: 10px;
+}
+.mini {
+    font-size: 10px;
+}
+.navigacia a:first-child {
+    border-radius: 10px 0 0 0;
+}
+.navigacia a {
+    font-weight: bold;
+    padding: 7px;
+    text-decoration: none;
+}
+.navigacia a:active, .navigacia a:visited, .navigacia a:link {
+    color: #555555;
+}
+.navigacia a:hover {
+    background-color: #555555;
+    color: #CCCCCC;
+}
+.footer {
+    font-size: 13px;
+    font-weight: bold;
+    padding: 3px;
+    text-align: center;
+}
+.container {
+    text-align: center;
+    width: 100%;
+}
+#steny {
+    background-color: #BBBBBB;
+    border: 1px solid #000000;
+    border-radius: 10px 10px 10px 10px;
+    margin: auto auto 10px;
+    padding: 5px 0;
+    text-align: center;
+    width: 300px;
+}
+#steny input {
+    vertical-align: super;
+}
+.parametre {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #BBBBBB;
+    border-color: #000000 #000000 -moz-use-text-color;
+    border-image: none;
+    border-radius: 10px 10px 0 0;
+    border-style: solid solid none;
+    border-width: 1px 1px medium;
+    margin: auto;
+    padding: 2px;
+    text-align: center;
+    width: 250px;
+}
+#vystup {
+    margin-top: 10px;
+    text-align: center;
+}
+#vystup a {
+    color: #FF2200;
+    font-weight: bold;
+    text-decoration: none;
+}
+.podmienky {
+    background-color: #CCCCCC;
+    border: 1px solid #BBBBBB;
+    float: right;
+    margin-right: 4%;
+    padding: 5px;
+    width: 200px;
+}
+.podmienky h3 {
+    color: #333333;
+    font-size: 18px;
+    margin: 0 0 10px;
+    text-align: center;
+    text-decoration: underline;
+}
+.podmienky > div {
+    display: list-item;
+    font-size: 14px;
+    margin-left: 20px;
+}
+.manual-nav {
+    background-color: #BBBBBB;
+    border: 1px solid #888888;
+    float: left;
+    font-size: 70%;
+    padding: 5px;
+    position: fixed;
+    top: 55px;
+}
+.manual-nav ul {
+    list-style: none outside none;
+    margin: 0;
+    padding: 0 2px 2px 15px;
+}
+.manual-nav a {
+    color: #000000;
+    text-decoration: none;
+}
+.manual-nav > ul > li > a {
+    color: #AA3333;
+    text-decoration: underline;
+}
+.manual-nav li > ul:hover {
+    background-color: #CCCCCC;
+}
+.manual-nav > ul > li > ul > li:hover {
+    background-color: #CC5555;
+}
+.tutorial {
+    background-color: #CCCCCC;
+    border: 1px solid #AAAAAA;
+    margin-bottom: 10px;
+    overflow: auto;
+    position: relative;
+}
+.tutorial h2 {
+    background-color: #AAAAAA;
+    font-family: sans-serif;
+    font-size: 125%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+.tutorial img {
+    float: left;
+    margin-top: -5px;
+    padding: 5px;
+}
+.tut {
+    padding: 0 0 0 5px;
+}
+.manual {
+    float: right;
+    padding-right: 20px;
+    width: 700px;
+}

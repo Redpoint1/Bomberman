@@ -1,12 +1,15 @@
 object Upgrade: TUpgrade
-  Left = 816
+  Left = 380
   Height = 375
-  Top = 189
+  Top = 167
   Width = 526
+  HelpType = htKeyword
+  HelpKeyword = 'HTML/manual.html#1-5'
   Caption = 'Upgrade'
   ClientHeight = 375
   ClientWidth = 526
   Color = 11429457
+  OnClose = FormClose
   OnCreate = FormCreate
   LCLVersion = '0.9.31'
   object Image1: TImage
@@ -2471,15 +2474,5 @@ object Upgrade: TUpgrade
     NumGlyphs = 0
     Transparent = False
     OnClick = LifeButtonClick
-  end
-  object Button1: TButton
-    Left = 224
-    Height = 25
-    Top = 280
-    Width = 75
-    Caption = 'Zavrieť'
-    Color = 11622723
-    OnClick = Button1Click
-    TabOrder = 0
   end
 end
