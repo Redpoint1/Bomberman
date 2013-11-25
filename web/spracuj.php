@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if(!empty($_GET["mapa"]) && !empty($_GET["sirka"]) && !empty($_GET["vyska"])){
 	$rozdelene = explode(',', $_GET["mapa"]);
 	$nazov = md5(rand(0,1000) . time());
