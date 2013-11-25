@@ -31,7 +31,7 @@ const //zdielane konstanty v hre
   nasobitelXP: array[0..2] of real = (1.5, 1, 1);
   //nasobenie skore NPC ,ktore zavisi od obtiaznosti
   Brana = 4; //id upgradeu brany
-  BranaMoznost = [4, 7]; //v akom id bloku sa moze nachadzat brana
+  BranaMoznost = [4, 6]; //v akom id bloku sa moze nachadzat brana
   pixel: integer = 33; //kolko pixelov ma jedna kocka 33x33
   RadiusCheck: integer = 25; //v akom okruhu najde NPC hraca a zabije ho
   KlavesnicePohybu = [VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT]; //klavesy pohybu hraca
@@ -54,7 +54,7 @@ const //zdielane konstanty v hre
   ZnicitelneBloky = [2, 4, 6, 7]; //ktore bloky moze nicit
 
   //====Upgrade====
-  BlokUpgrade = [4, 7]; //v akom type steny moze byt upgrade (okrem brany)
+  BlokUpgrade = [4, 6]; //v akom type steny moze byt upgrade (okrem brany)
   UncommonUpgrade: array[0..2] of integer = (0, 1, 2);
   //ktore typy upgradeov su menej cenne
   RareUpgrade: array[0..0] of integer = (3); //ktore su cennejsie

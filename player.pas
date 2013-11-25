@@ -124,9 +124,13 @@ begin
       end
       else //ak je pod stenou brana
       begin
-        Walle.Steny[PosY][PosX].Typ := 0; //nastav na volne policko
-        Walle.Steny[PosY][PosX].Obraz :=
-          Walle.UpgradeObr[Walle.Steny[PosY][PosX].Upgrade];  //a hod obrazok brany
+        Walle.Steny[PosY][PosX].Typ := ZmenaStien[Walle.Steny[PosY][PosX].Typ];
+        //nastav na volne policko
+        if (Walle.Steny[PosY][PosX].Typ = 0) then
+          Walle.Steny[PosY][PosX].Obraz :=
+            Walle.UpgradeObr[Walle.Steny[PosY][PosX].Upgrade]  //a hod obrazok brany
+        else
+          Walle.Steny[PosY][PosX].Obraz := Walle.StenyObr[Walle.Steny[PosY][PosX].Typ];
       end;
       Result := False; //skkonci a dalej nepokracuj s vybuchom
       exit;

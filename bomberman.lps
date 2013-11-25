@@ -21,11 +21,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="zaklad"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="303"/>
-        <CursorPos X="36" Y="326"/>
+        <TopLine Value="54"/>
+        <CursorPos X="23" Y="356"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -36,8 +35,8 @@
         <UnitName Value="player"/>
         <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="448"/>
-        <CursorPos X="1" Y="477"/>
+        <TopLine Value="193"/>
+        <CursorPos X="41" Y="215"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit2>
@@ -47,7 +46,7 @@
         <UnitName Value="game"/>
         <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="104"/>
+        <TopLine Value="18"/>
         <CursorPos X="38" Y="231"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -72,8 +71,8 @@
         <UnitName Value="upgradeform"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="80"/>
-        <CursorPos X="49" Y="80"/>
+        <TopLine Value="119"/>
+        <CursorPos X="47" Y="105"/>
         <UsageCount Value="175"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -81,10 +80,11 @@
         <Filename Value="share.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="share"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="45"/>
-        <CursorPos X="13" Y="42"/>
+        <TopLine Value="59"/>
+        <CursorPos X="12" Y="70"/>
         <UsageCount Value="175"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -97,7 +97,7 @@
         <UnitName Value="highscore"/>
         <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="29"/>
+        <TopLine Value="26"/>
         <CursorPos X="1" Y="29"/>
         <UsageCount Value="155"/>
         <Loaded Value="True"/>
@@ -258,95 +258,95 @@
       </Position7>
       <Position8>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="88" Column="29" TopLine="181"/>
+        <Caret Line="203" Column="1" TopLine="181"/>
       </Position8>
       <Position9>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="203" Column="1" TopLine="181"/>
+        <Caret Line="204" Column="1" TopLine="181"/>
       </Position9>
       <Position10>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="204" Column="1" TopLine="181"/>
+        <Caret Line="205" Column="1" TopLine="181"/>
       </Position10>
       <Position11>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="205" Column="1" TopLine="181"/>
+        <Caret Line="206" Column="28" TopLine="166"/>
       </Position11>
       <Position12>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="206" Column="28" TopLine="166"/>
+        <Caret Line="184" Column="1" TopLine="166"/>
       </Position12>
       <Position13>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="184" Column="1" TopLine="166"/>
+        <Caret Line="185" Column="1" TopLine="166"/>
       </Position13>
       <Position14>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="185" Column="1" TopLine="166"/>
+        <Caret Line="232" Column="1" TopLine="214"/>
       </Position14>
       <Position15>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="232" Column="1" TopLine="214"/>
+        <Caret Line="255" Column="1" TopLine="237"/>
       </Position15>
       <Position16>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="255" Column="1" TopLine="237"/>
+        <Caret Line="256" Column="1" TopLine="237"/>
       </Position16>
       <Position17>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="256" Column="1" TopLine="237"/>
+        <Caret Line="280" Column="1" TopLine="262"/>
       </Position17>
       <Position18>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="280" Column="1" TopLine="262"/>
+        <Caret Line="281" Column="1" TopLine="262"/>
       </Position18>
       <Position19>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="281" Column="1" TopLine="262"/>
+        <Caret Line="282" Column="1" TopLine="262"/>
       </Position19>
       <Position20>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="282" Column="1" TopLine="262"/>
+        <Caret Line="284" Column="1" TopLine="262"/>
       </Position20>
       <Position21>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="284" Column="1" TopLine="262"/>
+        <Caret Line="287" Column="1" TopLine="262"/>
       </Position21>
       <Position22>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="287" Column="1" TopLine="262"/>
+        <Caret Line="289" Column="1" TopLine="262"/>
       </Position22>
       <Position23>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="289" Column="1" TopLine="262"/>
+        <Caret Line="291" Column="1" TopLine="262"/>
       </Position23>
       <Position24>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="291" Column="1" TopLine="262"/>
+        <Caret Line="294" Column="1" TopLine="265"/>
       </Position24>
       <Position25>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="294" Column="1" TopLine="265"/>
+        <Caret Line="295" Column="1" TopLine="266"/>
       </Position25>
       <Position26>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="295" Column="1" TopLine="266"/>
+        <Caret Line="296" Column="1" TopLine="267"/>
       </Position26>
       <Position27>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="296" Column="1" TopLine="267"/>
+        <Caret Line="297" Column="1" TopLine="277"/>
       </Position27>
       <Position28>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="297" Column="1" TopLine="277"/>
+        <Caret Line="366" Column="32" TopLine="349"/>
       </Position28>
       <Position29>
         <Filename Value="zaklad.pas"/>
-        <Caret Line="366" Column="32" TopLine="349"/>
+        <Caret Line="329" Column="46" TopLine="303"/>
       </Position29>
       <Position30>
-        <Filename Value="zaklad.pas"/>
-        <Caret Line="329" Column="46" TopLine="303"/>
+        <Filename Value="player.pas"/>
+        <Caret Line="132" Column="13" TopLine="104"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>
