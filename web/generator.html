@@ -1,0 +1,187 @@
+﻿<html>
+<head>
+<title>Ročníkový projekt :: Bomberman</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+<link type="text/css" rel="stylesheet" href="./main.css" />
+</head>
+<body>
+	<div class="obsah">
+		<div class="hlavicka"></div>
+		<div class="navigacia"><a href="./index.html">Domov</a><a href="./download.html">Sťahovanie</a><a href="./screenshot.html">Obrázky</a><a href="./generator.html">Generovanie mapy</a><a href="./manual.html">Manuál</a></div>
+		<div class="hlavny">
+			<div class="podmienky">
+				<h3>Podmienky</h3>
+				<div id="podm1" style="color: #FF0000;">NPC > 1</div>
+				<div id="podm2" style="color: #FF0000;">Tehelna stena > 1</div>
+				<div>Čas mapy: <input type="text" name="cas" value="0" id="time" size="3" maxlength="3" /> sekúnd</div>
+			</div>
+			<div class="parametre">
+			Výška: <input type="text" style="width: 25px;" maxlength="2" value="5" id="vyska" />
+			Šírka: <input type="text" style="width: 25px;" maxlength="2" value="5" id="sirka" />
+			<input type="button" value="Zmeniť" onclick="draw();" />
+			</div>
+			<div id="steny">
+				<input type="radio" name="kocka" class="stena" checked="checked" value="0"><img id="0" alt="0" class="obr" src="./img/stena0.png" width="33px" height="33px" />
+				<input type="radio" name="kocka" class="stena" value="1"><img id="1" alt="1" class="obr" src="./img/stena1.png" width="33px" height="33px" />
+				<input type="radio" name="kocka" class="stena" value="2"><img id="2" alt="4" class="obr" src="./img/stena4.png" width="33px" height="33px" />
+				<input type="radio" name="kocka" class="stena" value="7"><img id="7" alt="7" class="obr" src="./img/stena7.png" width="33px" height="33px" />
+				<input type="radio" name="kocka" class="stena" value="3"><img id="3" alt="6" class="obr" src="./img/stena6.png" width="33px" height="33px" /><br />
+				<input type="radio" name="kocka" class="nepriatel" value="4"><img id="4" alt="0" class="npc" src="./img/npc0.png" width="33px" height="33px" />
+				<input type="radio" name="kocka" class="nepriatel" value="5"><img id="5" alt="1" class="npc" src="./img/npc1.png" width="33px" height="33px" />
+				<input type="radio" name="kocka" class="nepriatel" value="6"><img id="6" alt="2" class="npc" src="./img/npc2.png" width="33px" height="33px" />
+				<img id="4" alt="5" src="./img/stena5.png" class="obr" style="display: none;" width="33px" height="33px" />
+			</div> 
+			<div class="container">
+				<canvas oncontextmenu="return false;" onmouseup="vyber(event);" id="obr" width="176" height="176" style="border:1px solid #d3d3d3;background:#ffffff;">Váš prehliadač nepodporuje canvas!</canvas>
+			</div>
+			<form id="vystup" method="get" action="spracuj.php">
+				<input type="submit" id="genbutton" value="Vygenerovať" name="submit" onclick="send(); return false;" disabled="" />
+			</form>
+<script>
+var vyska, sirka, mapa, npc, ctx, c, co, prva, druha, tlacitko;
+
+window.onload=function() {
+	tlacitko = document.getElementById('genbutton');
+	prva = document.getElementById('podm1');
+	druha = document.getElementById('podm2');
+	c = document.getElementById('obr');
+	ctx = c.getContext('2d');
+	co=document.getElementsByName('kocka');
+
+	draw();
+}
+
+function draw() {	
+	mapa = new Array();
+	npc = new Array();
+	vyska = document.getElementById('vyska').value;
+	sirka = document.getElementById('sirka').value;
+	if (vyska < 4  || sirka < 4 || sirka > 40 || vyska > 40) {return false;}
+	c.height = parseInt(vyska)*35+2;
+	c.width = parseInt(sirka)*35+2;
+	fill();
+	vykresliSteny();
+	vykresliNpc();
+	sietka();
+}
+
+function fill() {
+	for(var i=0;i<vyska;i++){
+	 for(var j=0;j<sirka;j++){
+		if(i == 0 || j == 0 || i == (vyska-1) || j == (sirka-1)) {
+			mapa.push(5);
+		} else {
+			mapa.push(0);
+		}
+	 }
+	}
+}
+
+function vyber(e) {
+	var x=Math.floor((e.pageX-c.offsetLeft-2)/35);
+	var y=Math.floor((e.pageY-c.offsetTop-2)/35);
+	if(e.button == 2){
+		var skuska = (x+1)+'|'+(y+1)+'|'; 
+		for(var j in npc){
+			if(npc[j].substring(0, npc[j].length-1) == skuska){
+				npc.splice(j, 1);
+				var img = document.getElementById(0)
+				ctx.drawImage(img, x*35+2, y*35+2);
+				break;
+			}
+		}
+	} else {
+		if((x > 0) && (y > 0) && (x < (sirka-1)) && (y < (vyska-1)) && !((x == 1) && (y == 1)) && !((x == 1) && (y == 2)) && !((x == 2) && (y == 1))){
+			var img;
+			for(var i in co) {
+				if((co[i].checked)) {		
+					img=document.getElementById(co[i].value);
+					if(co[i].className == 'stena'){
+						var nasiel = false;
+						var npc2 = new Array();
+						for(var j in npc){
+							npc2 = npc[j].split('|')
+							if((npc2[0] == (x+1)) && (npc2[1] == (y+1))){
+								nasiel = true;
+								break;
+							}
+						}
+						if (!nasiel){mapa[y*sirka+x] = parseInt(img.alt);
+						ctx.drawImage(img, x*35+2, y*35+2);}
+					} else {
+						var nasiel = false;
+						var skuska = (x+1)+'|'+(y+1)+'|'+img.alt;
+						for(var j in npc){
+							if(npc[j]==skuska){nasiel = true; break;}
+						}
+						if(mapa[y*sirka+x]!=0){nasiel = true;}
+						if (!nasiel) {npc.push(skuska);
+						ctx.drawImage(img, x*35+2, y*35+2)}
+					}
+					break;
+				}
+			}
+		}
+	}
+	overPodmienky();
+}
+
+function sietka() {
+	ctx.lineWidth=2;
+	for(var i=1;i<c.width;i+=35){
+		ctx.moveTo(i,0);
+		ctx.lineTo(i,c.height);
+	}
+	for(var i=1;i<c.height;i+=35){
+		ctx.moveTo(0,i);
+		ctx.lineTo(c.width,i);
+	}
+	ctx.stroke();
+}
+
+function vykresliSteny() {
+	var img = document.getElementsByClassName('obr');
+	for(var i in mapa){
+		for(var j=0;j<img.length;j++){
+			if(img[j].alt == mapa[i]){
+				ctx.drawImage(img[j], (i%sirka)*35+2, Math.floor(i/sirka)*35+2);
+			}
+		}
+	}
+}
+
+function vykresliNpc() {
+	var explode;
+	var nepriatel=document.getElementsByClassName('npc');
+	for(var i in npc){
+		explode = npc[i].split('|');
+		for(var j in nepriatel){
+			if(nepriatel[j].alt == explode[2]){
+				ctx.drawImage(nepriatel[j], (explode[0]-1)*35+2, (explode[1]-1)*35+2);
+				break;
+			}	
+		}
+	}
+}
+
+function overPodmienky(){
+	if(npc.length > 0){prva.style.color = '#009900';} else {prva.style.color = '#FF0000';}
+	if(mapa.indexOf(4) > 0){druha.style.color = '#009900';} else {druha.style.color = '#FF0000';}
+	if((prva.style.color == 'rgb(0, 153, 0)') && (druha.style.color == 'rgb(0, 153, 0)')){tlacitko.disabled  = false;}else{tlacitko.disabled  = true;}
+}
+
+function send() {
+	var frame = document.createElement('iframe');
+	var rodic = document.getElementById('vystup');
+	var cas = document.getElementById('time').value;
+	frame.src = "spracuj.php?mapa="+mapa.toString()+"&sirka="+sirka+"&vyska="+vyska+"&cas="+cas+"&npc="+npc.toString()+"&pocet="+npc.length;
+	frame.hidden = true;
+	rodic.innerHTML = '';
+	rodic.appendChild(frame);
+}
+</script> 
+		</div>
+		<div class="footer">Richard Rožár 2iai4</div>
+	</div>
+</body>
+</html>
